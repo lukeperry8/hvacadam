@@ -1,0 +1,2215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>313D Ontario Apprenticeship Logbook & Sign-Off Tracker (Cloud Synced)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#090d16',
+            },
+            amber: {
+              450: '#f59e0b',
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sig-canvas {
+      touch-action: none;
+      cursor: crosshair;
+      background-color: #ffffff;
+      background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+                        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    @media print {
+      body { background-color: #ffffff !important; color: #000000 !important; font-size: 11pt; }
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      .print-break-inside-avoid { break-inside: avoid; }
+      #audit-report-container { display: block !important; box-shadow: none !important; border: none !important; padding: 0 !important; width: 100% !important; }
+      header, nav, .tab-content:not(#tab-audit), #toast-container { display: none !important; }
+      #tab-audit { display: block !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-20 md:pb-8">
+
+  <!-- Top Industrial Header -->
+  <header class="bg-slate-900 text-white border-b-4 border-amber-500 sticky top-0 z-30 shadow-lg no-print">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-lg shadow-inner shrink-0">
+          313D
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg leading-tight tracking-tight">Residential A/C Systems Mechanic</h1>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-amber-400 border border-slate-700">
+              Skilled Trades Ontario
+            </span>
+          </div>
+          <p class="text-xs text-slate-400" id="header-subtitle">Cloud Synced Training Standard Logbook &amp; Tracker</p>
+        </div>
+      </div>
+
+      <!-- Cloud Sync Status & Quick KPI -->
+      <div class="flex items-center gap-2 sm:gap-4 text-xs">
+        <button onclick="lockApp()" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold flex items-center gap-1 border border-slate-700" title="Lock App with PIN">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i> Lock
+        </button>
+        <div id="cloud-status-badge" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="cloud-dot"></span>
+          <span id="cloud-text">Connecting cloud...</span>
+        </div>
+        <div class="hidden md:flex items-center gap-4">
+          <div class="bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700">
+            <span class="text-slate-400">Skills Signed:</span>
+            <span class="font-bold text-amber-400 ml-1" id="header-skills-count">0 / 91</span>
+          </div>
+          <div class="bg-slate-800/90 px-3 py-1.5 rounded-lg border border-slate-700">
+            <span class="text-slate-400">Total Hours:</span>
+            <span class="font-bold text-emerald-400 ml-1" id="header-hours-count">0 / 4,500</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Navigation Tabs -->
+    <nav class="hidden md:block bg-slate-800 border-t border-slate-700/80">
+      <div class="max-w-6xl mx-auto px-4 flex space-x-1">
+        <button onclick="switchTab('logbook')" data-tab="logbook" class="nav-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-amber-500 text-amber-400 flex items-center gap-2 transition">
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i> Skills Logbook (91)
+        </button>
+        <button onclick="switchTab('guide')" data-tab="guide" class="nav-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+          <i data-lucide="book-open" class="w-4 h-4"></i> STO Standards &amp; Instruments
+        </button>
+        <button onclick="switchTab('hours')" data-tab="hours" class="nav-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+          <i data-lucide="clock" class="w-4 h-4"></i> Hours &amp; Schooling
+        </button>
+        <button onclick="switchTab('profile')" data-tab="profile" class="nav-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+          <i data-lucide="user-check" class="w-4 h-4"></i> Profile &amp; Trainers
+        </button>
+        <button onclick="switchTab('audit')" data-tab="audit" class="nav-btn px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Audit Report &amp; Backup
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 pt-4 space-y-4">
+
+    <!-- Mobile Cloud Sync Indicator Bar -->
+    <div id="mobile-cloud-banner" class="sm:hidden bg-slate-900 text-white rounded-xl px-3 py-2 text-xs flex items-center justify-between border border-slate-800 shadow-sm no-print">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="mobile-cloud-dot"></span>
+        <span id="mobile-cloud-text">Connecting to Firebase Cloud...</span>
+      </div>
+      <span class="text-amber-400 font-mono font-bold" id="mobile-sync-id">Syncing</span>
+    </div>
+
+    <!-- Collapsible STO / BOSTA Compliance Notice -->
+    <div id="compliance-banner" class="bg-amber-50 border-l-4 border-amber-500 rounded-xl p-3.5 sm:p-4 shadow-sm no-print">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-2.5">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+          <div class="text-xs sm:text-sm text-slate-800 space-y-1">
+            <div class="font-bold text-slate-900 flex items-center flex-wrap gap-2">
+              <span>Skilled Trades Ontario (STO) &amp; BOSTA Compliance Notice</span>
+              <span class="px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-amber-200/80 text-amber-950 rounded-md">Compulsory Trade 313D</span>
+            </div>
+            <p id="compliance-text" class="leading-relaxed text-slate-700">
+              Your logbook auto-syncs across your PC, phone, and tablet in real time via secure cloud storage. <strong>Each competency below includes exact STO pass criteria, mandatory specialty instruments, and step-by-step procedures</strong>. 313D is a compulsory trade under BOSTA; signing Trainers must hold an active 313D CofQ.
+            </p>
+          </div>
+        </div>
+        <button onclick="toggleCompliance()" class="text-xs font-semibold text-amber-800 hover:text-amber-950 underline shrink-0 p-1" id="compliance-toggle-btn">
+          Minimize
+        </button>
+      </div>
+    </div>
+
+    <!-- Top Overview KPI Cards -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 no-print">
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
+          <span>Competencies Signed</span>
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xl sm:text-2xl font-extrabold text-slate-900" id="kpi-skills">0 / 91</span>
+          <span class="text-xs font-semibold text-amber-600" id="kpi-skills-pct">0%</span>
+        </div>
+        <div class="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
+          <div id="kpi-skills-bar" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
+          <span>Skill Sets &ge; 80%</span>
+          <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xl sm:text-2xl font-extrabold text-slate-900" id="kpi-skillsets">0 / 8</span>
+          <span class="text-xs font-medium text-slate-500">Min. Target</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-2 truncate" id="kpi-skillsets-sub">80% per set required for Appendix C</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
+          <span>On-The-Job Hours</span>
+          <i data-lucide="wrench" class="w-4 h-4 text-blue-600"></i>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xl sm:text-2xl font-extrabold text-slate-900" id="kpi-otj-hours">0</span>
+          <span class="text-xs font-medium text-slate-500">/ 4,020 hrs</span>
+        </div>
+        <div class="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
+          <div id="kpi-otj-bar" class="bg-blue-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1">
+          <span>Total Program Hours</span>
+          <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-600"></i>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xl sm:text-2xl font-extrabold text-slate-900" id="kpi-total-hours">0</span>
+          <span class="text-xs font-medium text-slate-500">/ 4,500 hrs</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-2 truncate" id="kpi-school-sub">Includes 0 / 480 in-school hrs</p>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- TAB 1: INTERACTIVE SKILLS LOGBOOK (ALL 91 SKILLS)         -->
+    <!-- ========================================================= -->
+    <div id="tab-logbook" class="tab-content space-y-4">
+      <div class="bg-white rounded-xl p-3.5 sm:p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-col md:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input
+              type="text"
+              id="skill-search"
+              oninput="renderLogbook()"
+              placeholder="Search skill code (e.g., 9121.14) or keyword (brazing, refrigerant, wiring, superheat)..."
+              class="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
+            />
+            <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <select id="skillset-filter" onchange="renderLogbook()" class="px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="ALL">All 8 Skill Sets (91 Skills)</option>
+            <option value="9117">9117: Safety &amp; Workplace Practices (15)</option>
+            <option value="9118">9118: Business Practices &amp; Diagnostics (11)</option>
+            <option value="9119">9119: Tools, Equipment &amp; Instruments (11)</option>
+            <option value="9120">9120: Plan, Prepare &amp; Load Calcs (10)</option>
+            <option value="9121">9121: Install, Piping, Brazing &amp; Charging (15)</option>
+            <option value="9122">9122: Maintain Residential HVAC (5)</option>
+            <option value="9123">9123: Service, Diagnostics &amp; Electrical (17)</option>
+            <option value="9124">9124: Commissioning &amp; Start-Up (7)</option>
+          </select>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+          <div class="flex items-center gap-1.5">
+            <button onclick="setStatusFilter('ALL')" data-status="ALL" class="status-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white transition">
+              All
+            </button>
+            <button onclick="setStatusFilter('PENDING')" data-status="PENDING" class="status-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+              Pending
+            </button>
+            <button onclick="setStatusFilter('SIGNED')" data-status="SIGNED" class="status-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+              Signed Off
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="expandCollapseAll(true)" class="text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-lg hover:bg-slate-100">
+              Expand All
+            </button>
+            <button onclick="expandCollapseAll(false)" class="text-xs font-medium text-slate-600 hover:text-slate-900 px-2 py-1.5 rounded-lg hover:bg-slate-100">
+              Collapse All
+            </button>
+            <button onclick="toggleBatchMode()" id="batch-mode-btn" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-sm flex items-center gap-1.5 transition">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+              <span>Batch Sign-Off</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="batch-action-bar" class="hidden bg-slate-900 text-white rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2 text-xs sm:text-sm">
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-extrabold" id="batch-selected-count">0</span>
+            <span>skills selected for single jobsite sign-off</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearBatchSelection()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300">
+              Clear
+            </button>
+            <button onclick="openBatchSignModal()" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center gap-1.5">
+              <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i> Sign Selected Skills
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="skillsets-container" class="space-y-4"></div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 2: STO TRAINING STANDARDS & INSTRUMENT GUIDE          -->
+    <!-- ========================================================= -->
+    <div id="tab-guide" class="tab-content hidden space-y-4">
+      <div class="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+        <div class="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-amber-600">Skilled Trades Ontario — Trade Code 313D</div>
+            <h2 class="text-xl font-extrabold text-slate-900">STO Training Standards, Instrument Guide &amp; Pass Criteria</h2>
+            <p class="text-xs text-slate-600">Detailed breakdown of all 8 Skill Sets, mandatory specialty instruments, safety compliance (CSA B52, ODP Reg. 463/10), and sign-off benchmarks.</p>
+          </div>
+          <div class="shrink-0">
+            <button onclick="switchTab('logbook')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm">
+              <i data-lucide="clipboard-check" class="w-4 h-4"></i> Back to Logbook
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2">
+            <div class="font-bold text-slate-900 uppercase tracking-wider text-amber-800">Mandatory Specialty Instruments</div>
+            <ul class="list-disc pl-4 space-y-1 text-slate-700">
+              <li><strong>Digital Manifolds &amp; Thermocouples:</strong> Superheat &amp; subcooling calculations.</li>
+              <li><strong>Electronic Micron Gauges:</strong> Deep vacuum verification below 500 microns.</li>
+              <li><strong>Electronic Leak Detectors:</strong> Heated diode / ultrasonic refrigerant leak checks.</li>
+              <li><strong>Clamp Meters &amp; DMMs:</strong> Voltage, resistance, and compressor starting amperage.</li>
+              <li><strong>Anemometers &amp; Manometers:</strong> Airflow CFM and external static pressure (ESP).</li>
+            </ul>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2">
+            <div class="font-bold text-slate-900 uppercase tracking-wider text-amber-800">Regulatory Compliance &amp; Codes</div>
+            <ul class="list-disc pl-4 space-y-1 text-slate-700">
+              <li><strong>CSA B52:</strong> Mechanical Refrigeration Code for pressure testing and relief systems.</li>
+              <li><strong>Ontario Reg. 463/10 (ODP):</strong> Mandatory certification for recovering and handling fluorinated refrigerants.</li>
+              <li><strong>OHSA &amp; CSA Z462:</strong> Workplace safety, WHMIS, and electrical lock-out/tag-out (LOTO).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div id="training-guide-list" class="space-y-4 pt-2"></div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 3: HOURS & IN-SCHOOL TRAINING TRACKER                 -->
+    <!-- ========================================================= -->
+    <div id="tab-hours" class="tab-content hidden space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4 lg:col-span-1">
+          <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+              <i data-lucide="plus-circle" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-900 text-base">Log On-The-Job Hours</h2>
+              <p class="text-xs text-slate-500">Target: 4,020 practical field hours</p>
+            </div>
+          </div>
+
+          <form onsubmit="addHoursEntry(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Date / Week Ending *</label>
+              <input type="date" id="hours-date" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Hours Worked *</label>
+                <input type="number" id="hours-amount" step="0.5" min="0.5" max="200" placeholder="e.g., 40" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Work Category</label>
+                <select id="hours-category" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                  <option value="Residential Install">Residential Install</option>
+                  <option value="Service & Diagnostics">Service &amp; Diagnostics</option>
+                  <option value="Preventive Maintenance">Maintenance</option>
+                  <option value="Commissioning / Start-Up">Commissioning</option>
+                  <option value="Sheet Metal / Ductwork">Ductwork / Airflow</option>
+                  <option value="Heat Pump / Hydronics">Heat Pump / Hydronics</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Sponsor / Employer</label>
+              <input type="text" id="hours-sponsor" placeholder="Auto-fills from Profile or enter sponsor" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Work Summary / Job Reference</label>
+              <input type="text" id="hours-notes" placeholder="e.g., 2 heat pump splits + 1 A/C service week" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition">
+              <i data-lucide="save" class="w-4 h-4 text-amber-400"></i> Record Field Hours
+            </button>
+          </form>
+        </div>
+
+        <div class="space-y-4 lg:col-span-2">
+          <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="font-bold text-slate-900 text-base">In-School Curriculum Training (480 Hours Total)</h2>
+                <p class="text-xs text-slate-500">Check off completed Ministry-approved Training Delivery Agent (TDA) levels</p>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200" id="school-hours-badge">
+                0 / 480 Hours Completed
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/70 space-y-2.5">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" id="school-lvl1" onchange="toggleSchoolLevel(1)" class="w-5 h-5 mt-0.5 rounded text-amber-500 focus:ring-amber-500 border-slate-300" />
+                  <div>
+                    <div class="font-bold text-sm text-slate-900">Level 1: Common Core (240 Hours)</div>
+                    <div class="text-xs text-slate-500">Basic Refrigeration &amp; A/C Theory</div>
+                  </div>
+                </label>
+                <ul class="text-xs text-slate-600 space-y-1 pl-8 list-disc">
+                  <li><strong>S0731:</strong> Workplace Safety &amp; Rigging</li>
+                  <li><strong>S0732:</strong> Trade Calculations &amp; Science</li>
+                  <li><strong>S0733:</strong> Tools, Piping &amp; Brazing</li>
+                  <li><strong>S0734:</strong> Refrigeration Fundamentals</li>
+                  <li><strong>S0735:</strong> Basic Electricity &amp; Controls</li>
+                  <li><strong>S0736:</strong> Blueprint Reading &amp; Drawings</li>
+                  <li><strong>S0737:</strong> Residential Systems Intro</li>
+                </ul>
+              </div>
+
+              <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/70 space-y-2.5">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" id="school-lvl2" onchange="toggleSchoolLevel(2)" class="w-5 h-5 mt-0.5 rounded text-amber-500 focus:ring-amber-500 border-slate-300" />
+                  <div>
+                    <div class="font-bold text-sm text-slate-900">Level 2: Intermediate (240 Hours)</div>
+                    <div class="text-xs text-slate-500">Residential Systems, Heat Pumps &amp; Commissioning</div>
+                  </div>
+                </label>
+                <ul class="text-xs text-slate-600 space-y-1 pl-8 list-disc">
+                  <li><strong>S0738:</strong> Residential Load Calculations &amp; Design</li>
+                  <li><strong>S0739:</strong> Air Handling, Ducts &amp; Psychrometrics</li>
+                  <li><strong>S0740:</strong> Residential A/C &amp; Heat Pump Systems</li>
+                  <li><strong>S0741:</strong> Advanced Electrical &amp; Electronic Controls</li>
+                  <li><strong>S0742:</strong> Installation, Service &amp; Diagnostics</li>
+                  <li><strong>S0743:</strong> Commissioning &amp; Regulatory Codes</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-slate-900 text-base">Field Hours Log History</h3>
+              <span class="text-xs font-semibold text-slate-500" id="hours-entry-count">0 entries</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr class="border-b border-slate-200 text-xs uppercase text-slate-500 bg-slate-50">
+                    <th class="py-2.5 px-3 rounded-tl-lg">Date</th>
+                    <th class="py-2.5 px-3">Hours</th>
+                    <th class="py-2.5 px-3">Category</th>
+                    <th class="py-2.5 px-3">Sponsor / Notes</th>
+                    <th class="py-2.5 px-3 text-right rounded-tr-lg">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="hours-table-body" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 4: PROFILE & REGISTERED TRAINERS                      -->
+    <!-- ========================================================= -->
+    <div id="tab-profile" class="tab-content hidden space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 text-amber-400 flex items-center justify-center">
+              <i data-lucide="id-card" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-900 text-base">Apprentice &amp; Sponsor Registration</h2>
+              <p class="text-xs text-slate-500">Matches Page 1 &amp; Appendix B of your STO Logbook</p>
+            </div>
+          </div>
+
+          <form onsubmit="saveProfile(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Apprentice Full Legal Name</label>
+              <input type="text" id="prof-apprentice-name" placeholder="e.g., Adam Smith" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Training Agreement # (RTA)</label>
+                <input type="text" id="prof-agreement-num" placeholder="e.g., 1234567" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Skilled Trades Ontario Account #</label>
+                <input type="text" id="prof-sto-num" placeholder="e.g., STO-987654" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Current Sponsor / HVAC Contractor Name</label>
+              <input type="text" id="prof-sponsor-name" placeholder="e.g., Maple Leaf Heating & Air Conditioning Ltd." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Sponsor Phone / Contact</label>
+                <input type="text" id="prof-sponsor-contact" placeholder="e.g., (416) 555-0199" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Apprenticeship Start Date</label>
+                <input type="date" id="prof-start-date" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition">
+              <i data-lucide="check" class="w-4 h-4"></i> Save Apprentice &amp; Sponsor Info
+            </button>
+          </form>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center gap-2.5 border-b border-slate-100 pb-3">
+            <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+              <i data-lucide="hard-hat" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-900 text-base">List of Trainers / Journeypersons</h2>
+              <p class="text-xs text-slate-500">Page 18 Registry — Must hold active 313D CofQ</p>
+            </div>
+          </div>
+
+          <form onsubmit="addTrainer(event)" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
+            <div class="text-xs font-bold text-slate-700 uppercase tracking-wider">Add Supervising Journeyperson</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <input type="text" id="trainer-name" required placeholder="Journeyperson Full Name *" class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+              <input type="text" id="trainer-cofq" required placeholder="313D CofQ / STO License # *" class="px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2.5">
+              <div class="flex-1">
+                <input type="date" id="trainer-start" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" title="Supervision Start Date" />
+              </div>
+              <button type="submit" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 shrink-0">
+                <i data-lucide="user-plus" class="w-4 h-4 text-amber-400"></i> Add Trainer
+              </button>
+            </div>
+          </form>
+
+          <div id="trainers-list" class="space-y-2.5"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- TAB 5: AUDIT REPORT, CSV EXPORT & BACKUP                  -->
+    <!-- ========================================================= -->
+    <div id="tab-audit" class="tab-content hidden space-y-4">
+      <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-sm space-y-4 no-print">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h2 class="font-bold text-slate-900 text-base sm:text-lg">Inspection Export &amp; Cloud Sync Controls</h2>
+            <p class="text-xs text-slate-500">Generate an audit-ready report or manage your cloud sync backups.</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+              <i data-lucide="printer" class="w-4 h-4 text-amber-400"></i> Print / Save PDF Report
+            </button>
+            <button onclick="exportCSV()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="text-xs text-slate-600">
+            <strong class="text-slate-900 block text-sm mb-0.5">Firebase Real-Time Cloud Sync Active</strong>
+            Changes made on your PC appear instantly on your phone or tablet. You can also download a JSON backup anytime.
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="exportJSON()" class="px-3.5 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 font-semibold text-xs flex items-center gap-1.5">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Backup JSON
+            </button>
+            <label class="px-3.5 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 font-semibold text-xs flex items-center gap-1.5 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i> Restore JSON
+              <input type="file" accept=".json" onchange="importJSON(event)" class="hidden" />
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="audit-report-container" class="bg-white rounded-xl p-5 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="border-b-2 border-slate-900 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-amber-600">Skilled Trades Ontario — Trade Code 313D</div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Residential Air Conditioning Systems Mechanic</h2>
+            <p class="text-xs text-slate-600">Apprenticeship Training Standard — Digital Field Competency &amp; Hours Audit Summary</p>
+          </div>
+          <div class="text-left sm:text-right text-xs text-slate-600">
+            <div><strong>Generated:</strong> <span id="audit-date"></span></div>
+            <div><strong>Standard Ref:</strong> Skill Sets 9117 – 9124</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div class="space-y-1.5">
+            <div class="font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1">Apprentice Information</div>
+            <div><span class="text-slate-500">Full Name:</span> <strong id="audit-apprentice-name">—</strong></div>
+            <div><span class="text-slate-500">Training Agreement #:</span> <strong id="audit-agreement-num">—</strong></div>
+            <div><span class="text-slate-500">STO Account #:</span> <strong id="audit-sto-num">—</strong></div>
+          </div>
+          <div class="space-y-1.5">
+            <div class="font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1">Sponsor &amp; Hours Benchmark</div>
+            <div><span class="text-slate-500">Sponsor:</span> <strong id="audit-sponsor-name">—</strong></div>
+            <div><span class="text-slate-500">On-The-Job Hours:</span> <strong id="audit-otj-hours">0 / 4,020 hrs</strong></div>
+            <div><span class="text-slate-500">In-School + Total Hours:</span> <strong id="audit-total-hours">0 / 4,500 hrs</strong></div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Registered Supervising Trainers (313D CofQ Holders)</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs border border-slate-200">
+              <thead class="bg-slate-100 text-slate-700">
+                <tr>
+                  <th class="p-2 border border-slate-200">Trainer / Journeyperson Name</th>
+                  <th class="p-2 border border-slate-200">313D CofQ / STO License #</th>
+                  <th class="p-2 border border-slate-200">Supervision Start Date</th>
+                </tr>
+              </thead>
+              <tbody id="audit-trainers-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Skill Set Completion Summary (80% Minimum Requirement)</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs border border-slate-200">
+              <thead class="bg-slate-100 text-slate-700">
+                <tr>
+                  <th class="p-2 border border-slate-200">Code</th>
+                  <th class="p-2 border border-slate-200">Skill Set Title</th>
+                  <th class="p-2 border border-slate-200 text-center">Signed / Total</th>
+                  <th class="p-2 border border-slate-200 text-center">% Complete</th>
+                  <th class="p-2 border border-slate-200">Appendix C Status</th>
+                </tr>
+              </thead>
+              <tbody id="audit-skillsets-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Detailed Record of Signed-Off Competencies</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs border border-slate-200">
+              <thead class="bg-slate-100 text-slate-700">
+                <tr>
+                  <th class="p-2 border border-slate-200">Skill #</th>
+                  <th class="p-2 border border-slate-200">Competency Description</th>
+                  <th class="p-2 border border-slate-200">Date</th>
+                  <th class="p-2 border border-slate-200">Trainer &amp; CofQ #</th>
+                  <th class="p-2 border border-slate-200">Signature</th>
+                  <th class="p-2 border border-slate-200">Job Notes / WO</th>
+                </tr>
+              </thead>
+              <tbody id="audit-signed-skills-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="text-[11px] text-slate-500 border-t border-slate-200 pt-3">
+          <strong>Compliance Reminder:</strong> Official Certificate of Apprenticeship issuance by Skilled Trades Ontario requires submission of the physical Training Standard Logbook containing wet signatures and completed Appendix B &amp; Appendix C forms.
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Mobile Navigation Bar -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-slate-900 border-t border-slate-800 z-30 flex justify-around py-1.5 px-1 no-print shadow-2xl">
+    <button onclick="switchTab('logbook')" data-tab="logbook" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-lg text-amber-400">
+      <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Logbook</span>
+    </button>
+    <button onclick="switchTab('guide')" data-tab="guide" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-lg text-slate-400">
+      <i data-lucide="book-open" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Standards</span>
+    </button>
+    <button onclick="switchTab('hours')" data-tab="hours" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-lg text-slate-400">
+      <i data-lucide="clock" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Hours</span>
+    </button>
+    <button onclick="switchTab('profile')" data-tab="profile" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-lg text-slate-400">
+      <i data-lucide="user-check" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Trainers</span>
+    </button>
+    <button onclick="switchTab('audit')" data-tab="audit" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2 rounded-lg text-slate-400">
+      <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Audit</span>
+    </button>
+  </nav>
+
+  <!-- STO CRITERIA & REQUIREMENT MODAL -->
+  <div id="criteria-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white w-full sm:max-w-xl rounded-2xl shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="bg-slate-900 text-white px-4 py-3.5 flex items-center justify-between border-b-2 border-amber-500">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400" id="crit-modal-code">SKILL 9117.01</span>
+          <h3 class="font-bold text-sm sm:text-base leading-snug" id="crit-modal-title">Skill Title</h3>
+        </div>
+        <button onclick="closeCriteriaModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-3.5 text-xs sm:text-sm">
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+          <div class="font-bold text-slate-900 text-amber-800 uppercase tracking-wider text-xs">STO Competency Requirement</div>
+          <p class="text-slate-700 leading-relaxed" id="crit-modal-req">Requirement details...</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="bg-blue-50/70 p-3.5 rounded-xl border border-blue-200 space-y-1">
+            <div class="font-bold text-blue-900 uppercase tracking-wider text-xs flex items-center gap-1.5">
+              <i data-lucide="wrench" class="w-3.5 h-3.5"></i> Mandatory Tools &amp; Instruments
+            </div>
+            <p class="text-blue-950 text-xs leading-relaxed" id="crit-modal-tools">Tools...</p>
+          </div>
+
+          <div class="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200 space-y-1">
+            <div class="font-bold text-emerald-900 uppercase tracking-wider text-xs flex items-center gap-1.5">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Sign-Off Pass Criteria
+            </div>
+            <p class="text-emerald-950 text-xs leading-relaxed" id="crit-modal-criteria">Criteria...</p>
+          </div>
+        </div>
+
+        <div class="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 space-y-1">
+          <div class="font-bold text-amber-900 uppercase tracking-wider text-xs flex items-center gap-1.5">
+            <i data-lucide="list-checks" class="w-3.5 h-3.5"></i> Step-by-Step Procedure / How to Train
+          </div>
+          <p class="text-amber-950 text-xs leading-relaxed whitespace-pre-line" id="crit-modal-proc">Procedure...</p>
+        </div>
+      </div>
+
+      <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex items-center justify-between gap-3">
+        <button onclick="closeCriteriaModal()" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs">
+          Close
+        </button>
+        <button onclick="proceedToSignFromCriteria()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="pen-tool" class="w-4 h-4"></i> Proceed to Sign-Off
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGN-OFF MODAL -->
+  <div id="signoff-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 no-print">
+    <div class="bg-white w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden">
+      <div class="bg-slate-900 text-white px-4 py-3.5 flex items-center justify-between border-b-2 border-amber-500">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400" id="modal-skill-code">SKILL 9117.01</span>
+          <h3 class="font-bold text-sm sm:text-base leading-snug" id="modal-skill-title">Skill Title</h3>
+        </div>
+        <button onclick="closeSignModal()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitSkillSignOff(event)" class="p-4 sm:p-5 overflow-y-auto space-y-4">
+        <!-- Quick Pass Criteria Reminder in Sign Modal -->
+        <div id="modal-criteria-reminder" class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-xs text-emerald-900 space-y-0.5">
+          <div class="font-bold uppercase tracking-wider text-[11px] text-emerald-800">Pass Criteria Verification</div>
+          <p id="modal-reminder-text">Ensure apprentice demonstrates competency safely according to STO standards.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Date Demonstrated *</label>
+            <input type="date" id="modal-date" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Select Registered Trainer</label>
+            <select id="modal-trainer-select" onchange="handleTrainerSelectChange()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none">
+              <option value="CUSTOM">-- Custom / Enter Below --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Journeyperson Full Name *</label>
+            <input type="text" id="modal-trainer-name" required placeholder="e.g., Mike Vance" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">313D CofQ / STO License # *</label>
+            <input type="text" id="modal-trainer-cofq" required placeholder="e.g., 313D-449201" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-slate-700">Journeyperson Field Signature (Touch / Mouse) *</label>
+            <button type="button" onclick="clearSignaturePad()" class="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1">
+              <i data-lucide="eraser" class="w-3.5 h-3.5"></i> Clear Pad
+            </button>
+          </div>
+          <div class="border-2 border-dashed border-slate-300 rounded-xl overflow-hidden bg-white relative">
+            <canvas id="signature-pad" class="sig-canvas w-full h-32 block"></canvas>
+            <div id="sig-placeholder" class="pointer-events-none absolute inset-0 flex items-center justify-center text-xs text-slate-400">
+              Sign with finger or stylus here
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Job Notes / Work Order # (Optional)</label>
+          <input type="text" id="modal-notes" placeholder="e.g., WO #4021 - Lennox 3-ton heat pump commissioning" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+          <button type="button" id="modal-revoke-btn" onclick="revokeSkillSignOff()" class="hidden px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs flex items-center gap-1.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i> Remove Sign-Off
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" onclick="closeSignModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm">
+              Cancel
+            </button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md flex items-center gap-1.5">
+              <i data-lucide="check-circle" class="w-4 h-4"></i> Confirm &amp; Sign Off
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom Confirmation Modal -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center gap-2.5 text-slate-900">
+        <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-500 shrink-0"></i>
+        <h3 class="font-bold text-base" id="confirm-title">Confirm Action</h3>
+      </div>
+      <p class="text-sm text-slate-600" id="confirm-message">Are you sure you want to proceed?</p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeConfirmModal(false)" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">Cancel</button>
+        <button onclick="closeConfirmModal(true)" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 z-50 space-y-2 pointer-events-none no-print"></div>
+
+  <!-- MANDATORY PIN / PASSWORD LOCK OVERLAY -->
+  <div id="pin-lock-overlay" class="fixed inset-0 z-50 hidden bg-slate-950 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-white shadow-2xl space-y-5">
+      <div class="text-center space-y-2">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-xl mx-auto shadow-inner">
+          313D
+        </div>
+        <h2 class="text-xl font-extrabold tracking-tight" id="pin-modal-title">Private Logbook Locked</h2>
+        <p class="text-xs text-slate-400" id="pin-modal-desc">Enter PIN (4747) to access your secure apprenticeship records.</p>
+      </div>
+
+      <form onsubmit="handlePinSubmit(event)" class="space-y-4">
+        <div>
+          <input type="password" id="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Enter PIN..." required class="w-full text-center tracking-widest text-2xl font-bold py-3 bg-slate-800 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+        <button type="submit" id="pin-submit-btn" class="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm shadow-lg transition">
+          Unlock Logbook
+        </button>
+      </form>
+      <div class="text-center text-[11px] text-slate-500">
+        100% Private • Secured locally &amp; synced via cloud.
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Comprehensive STO Training Standard data with detailed criteria for all 91 skills
+    const SKILL_SETS = [
+      {
+        code: "9117",
+        title: "Protect Self, Others and the Environment",
+        skills: [
+          { code: "9117.01", title: "Comply with applicable Acts, regulations, Codes and safety directives", req: "Adhere to OHSA, ESA, CSA B52, and Ontario Building Code standards on every residential jobsite.", tools: "Safety manuals, OHSA binder, WHMIS labels.", procedure: "1. Review site safety plan before starting work.\n2. Identify jurisdiction codes and potential electrical/pressure hazards.", passCriteria: "Demonstrates full compliance with OHSA regulations and company safety policies without infractions." },
+          { code: "9117.02", title: "Use personal protective equipment (PPE)", req: "Wear required CSA-approved protective footwear, eye protection, gloves, and hardhats as required.", tools: "Safety glasses, steel-toed boots, cut-resistant gloves, earplugs.", procedure: "1. Inspect PPE for damage prior to donning.\n2. Wear safety glasses during brazing, drilling, and refrigerant handling.", passCriteria: "Correctly identifies and utilizes mandatory PPE for specific job tasks (e.g., face shield when brazing)." },
+          { code: "9117.03", title: "Maintain personal protective equipment (PPE)", req: "Inspect, clean, and store PPE properly to ensure continuous protective integrity.", tools: "Cleaning cloth, storage case.", procedure: "1. Clean safety glasses and face shields.\n2. Check footwear soles and leather condition regularly.", passCriteria: "Maintains PPE in clean, serviceable condition and replaces damaged items promptly." },
+          { code: "9117.04", title: "Maintain a safe, clean and organized work environment", req: "Keep residential work areas free of trip hazards, debris, and tools.", tools: "Broom, trash bags, tool organizer.", procedure: "1. Lay drop cloths over customer flooring.\n2. Keep cords and hoses coiled and clear of walkways.", passCriteria: "Leaves homeowner's premises spotless and hazard-free upon completion of work." },
+          { code: "9117.05", title: "Handle hazardous substances", req: "Safely handle chemical cleaners, refrigerant oils, adhesives, and brazing fluxes per WHMIS.", tools: "WHMIS SDS sheets, chemical gloves, respirator.", procedure: "1. Read Safety Data Sheet (SDS) for all chemicals.\n2. Use secondary containment and approved disposal methods.", passCriteria: "Demonstrates correct handling and spill prevention for HVAC chemicals." },
+          { code: "9117.06", title: "Identify occupant specific safety hazards in residential setting", req: "Recognize vulnerable occupants, pets, restricted areas, and indoor air quality risks.", tools: "Visual inspection, CO detector.", procedure: "1. Communicate with homeowner regarding pets and children.\n2. Verify clearance around gas appliances and return air paths.", passCriteria: "Identifies occupant safety risks and takes preventative measures before initiating work." },
+          { code: "9117.07", title: "Identify worker specific safety hazards in residential setting", req: "Recognize attic, crawlspace, ladder, electrical, and structural hazards.", tools: "Extension ladder, work light, voltage detector.", procedure: "1. Inspect ladder stability on uneven residential floors.\n2. Check attic access for insulation hazards and live exposed wiring.", passCriteria: "Performs hazard assessment prior to entering tight or elevated spaces." },
+          { code: "9117.08", title: "Identify biohazards", req: "Recognize mold, mildew, animal droppings, and stagnant standing water in drain pans.", tools: "N95 respirator, flashlight, antimicrobial spray.", procedure: "1. Inspect evaporator coils and condensate pans for biological growth.\n2. Wear appropriate respiratory protection when cleaning contaminated equipment.", passCriteria: "Safely identifies and mitigates biohazards during service and maintenance." },
+          { code: "9117.09", title: "Handle compressed gases", req: "Transport, secure, and operate nitrogen and oxy-acetylene cylinders safely.", tools: "Cylinder cart, safety chains, pressure regulators, leak soap.", procedure: "1. Secure cylinders upright with chains during transport and storage.\n2. Always use dual-stage regulators on nitrogen cylinders; never exceed test pressures.", passCriteria: "Demonstrates secure cylinder handling and correct pressure regulator operation." },
+          { code: "9117.10", title: "Transport compressed gases", req: "Comply with TDG regulations when transporting cylinders in service vehicles.", tools: "Vehicle cylinder brackets, warning placards.", procedure: "1. Ventilate vehicle cargo area.\n2. Securely clamp nitrogen and torch tanks in approved racks.", passCriteria: "Meets Transportation of Dangerous Goods (TDG) securing standards." },
+          { code: "9117.11", title: "Follow fire safety procedures", req: "Maintain fire extinguisher on site during brazing and soldering operations.", tools: "ABC dry chemical fire extinguisher, wet fire blanket.", procedure: "1. Position fire extinguisher within arm's reach when torch is lit.\n2. Use heat shield blankets to protect surrounding wood and drywall.", passCriteria: "Demonstrates correct fire watch and extinguisher readiness during hot work." },
+          { code: "9117.12", title: "Report injuries to supervisor and first aid personnel", req: "Follow immediate incident reporting protocols for any workplace injury or near-miss.", tools: "First aid kit, emergency contact list.", procedure: "1. Administer immediate first aid if trained.\n2. Notify supervisor and document incident report.", passCriteria: "Follows correct accident reporting and emergency response chain." },
+          { code: "9117.13", title: "Lock out, tag out or isolate equipment for repair or maintenance", req: "De-energize electrical disconnects and gas valves; apply LOTO locks and tags.", tools: "Lockout padlock, lockout HASP, tag, voltage tester.", procedure: "1. Shut off power at equipment disconnect switch.\n2. Apply padlock and tag; verify zero energy state with multimeter.", passCriteria: "Performs 100% verified zero-energy LOTO before servicing electrical or moving parts." },
+          { code: "9117.14", title: "Minimize the environmental footprint", req: "Prevent refrigerant venting, recycle scrap metal, and properly dispose of filters and oils.", tools: "Refrigerant recovery unit, certified recovery cylinders.", procedure: "1. Never vent CFC, HCFC, or HFC refrigerants.\n2. Recover all refrigerant down to required vacuum levels before opening system.", passCriteria: "Strictly adheres to ODP regulations and environmental protection guidelines." },
+          { code: "9117.15", title: "Clean-up worksite and equipment", req: "Restore jobsite to original condition, remove scrap materials, and wipe down equipment casing.", tools: "Vacuum, rags, cleaning solution.", procedure: "1. Clean fingerprints and smudges off unit panels.\n2. Vacuum metal shavings and packaging debris from workspace.", passCriteria: "Delivers professional clean-up and customer site walkthrough." }
+        ]
+      },
+      {
+        code: "9118",
+        title: "Demonstrate Business Practices",
+        skills: [
+          { code: "9118.01", title: "Determine nature of service or maintenance call", req: "Review customer complaint, error codes, and equipment operating history.", tools: "Service dispatch tablet, customer log.", procedure: "1. Listen actively to customer description of symptom.\n2. Review past service records and equipment age.", passCriteria: "Accurately interprets service call objective and prepares diagnostic strategy." },
+          { code: "9118.02", title: "Conduct a site evaluation", req: "Assess mechanical room layout, electrical panel capacity, and airflow pathways.", tools: "Flashlight, tape measure, camera.", procedure: "1. Locate electrical panel and main shut-offs.\n2. Evaluate equipment clearance and combustion air sources.", passCriteria: "Performs thorough site assessment identifying structural or electrical constraints." },
+          { code: "9118.03", title: "Perform a diagnostic inspection", req: "Systematically test electrical, mechanical, and airflow components to isolate faults.", tools: "Multimeter, manifold gauges, thermometer.", procedure: "1. Check incoming power, fuses, and transformer voltage.\n2. Measure operating pressures and temperatures.", passCriteria: "Isolates root cause of equipment failure accurately without unnecessary part swapping." },
+          { code: "9118.04", title: "Estimate costs of service or maintenance call", req: "Calculate repair parts, labor hours, and warranty status for customer quote.", tools: "Price book, estimating software.", procedure: "1. Look up replacement part pricing and availability.\n2. Calculate flat-rate or time-and-material repair quote.", passCriteria: "Provides transparent, accurate pricing and explains repair options clearly." },
+          { code: "9118.05", title: "Complete installation, service or maintenance schedule", req: "Manage daily service route and work order scheduling efficiently.", tools: "Digital calendar, dispatch app.", procedure: "1. Confirm arrival time windows with customers.\n2. Complete scheduled maintenance checklist within allotted time.", passCriteria: "Maintains organized schedule and respects customer timeframes." },
+          { code: "9118.06", title: "Complete job documentation", req: "Fill out service invoices, refrigerant logs, warranty forms, and sign-off sheets.", tools: "Tablet, pen, carbon copy work order.", procedure: "1. Document work performed, parts used, and refrigerant recovered.\n2. Obtain customer signature and payment confirmation.", passCriteria: "Produces legible, complete, and legally compliant service documentation." },
+          { code: "9118.07", title: "Instruct clients on equipment operation, routine maintenance or servicing procedures", req: "Educate homeowner on thermostat programming, air filter changes, and seasonal shut-down.", tools: "Thermostat manual, sample air filter.", procedure: "1. Demonstrate how to slide out and replace the air filter.\n2. Explain basic thermostat schedules and emergency heat settings.", passCriteria: "Communicates clearly so the client can operate and maintain their system independently." },
+          { code: "9118.08", title: "Communicate with clients, co-workers, vendors and integrated design team", req: "Maintain professional, respectful, and technical dialogue across project stakeholders.", tools: "Phone, radio, email.", procedure: "1. Use clear technical terminology with colleagues and plain language with clients.", passCriteria: "Exhibits professional communication and conflict resolution skills." },
+          { code: "9118.09", title: "Resolve conflicts", req: "De-escalate customer concerns or scheduling disputes professionally.", tools: "Interpersonal communication skills.", procedure: "1. Listen calmly to customer feedback.\n2. Propose constructive solutions in coordination with management.", passCriteria: "Handles client dissatisfaction calmly and professionally." },
+          { code: "9118.10", title: "Perform customer service functions", req: "Represent the contracting company with high standards of professionalism and neatness.", tools: "Company uniform, shoe covers.", procedure: "1. Wear shoe covers before entering customer home.\n2. Answer questions politely and maintain clean work area.", passCriteria: "Delivers top-tier customer satisfaction and brand representation." },
+          { code: "9118.11", title: "Mentor other apprentices and colleagues", req: "Guide junior apprentices through technical procedures and safety protocols.", tools: "Training standard logbook.", procedure: "1. Demonstrate proper tool usage and explain theory of operation.\n2. Supervise junior apprentice during hands-on tasks.", passCriteria: "Provides effective, patient, and safety-conscious mentorship." }
+        ]
+      },
+      {
+        code: "9119",
+        title: "Use and Maintain Tools, Devices and Equipment",
+        skills: [
+          { code: "9119.01", title: "Use hand tools", req: "Safely operate wrenches, screwdrivers, pliers, tubing cutters, and flaring tools.", tools: "Wrenches, screwdrivers, tubing cutter, flaring tool.", procedure: "1. Select correct size wrench to prevent rounding fastener heads.\n2. Ream copper tubing inner burrs after cutting.", passCriteria: "Demonstrates correct hand tool selection and technique." },
+          { code: "9119.02", title: "Maintain hand tools", req: "Keep hand tools clean, oiled, and inspect for worn grips or cracked handles.", tools: "Cleaning oil, rag.", procedure: "1. Wipe down metal tools with light oil to prevent rust.\n2. Replace damaged or cracked screwdrivers.", passCriteria: "Maintains tools in safe, fully operational condition." },
+          { code: "9119.03", title: "Use power tools", req: "Operate cordless drills, hammer drills, reciprocating saws, and grinders safely.", tools: "Cordless drill, hammer drill, reciprocating saw, safety goggles.", procedure: "1. Check battery charge and secure drill bits firmly in chuck.\n2. Wear safety glasses and hearing protection during operation.", passCriteria: "Operates power tools with proper grip, stance, and safety precautions." },
+          { code: "9119.04", title: "Maintain power tools", req: "Inspect cords, batteries, motor brushes, and chuck mechanisms regularly.", tools: "Battery charger, air compressor.", procedure: "1. Clean ventilation slots and check battery terminals for corrosion.", passCriteria: "Ensures power equipment is serviced and ready for field deployment." },
+          { code: "9119.05", title: "Use measuring devices (electrical, digital, analog)", req: "Measure AC/DC voltage, resistance (ohms), and capacitance using digital multimeters.", tools: "Digital Multimeter (CAT III/IV), test leads.", procedure: "1. Select correct meter function and range.\n2. Verify meter on known live source before testing for zero energy.", passCriteria: "Accurately measures electrical parameters following safety procedures." },
+          { code: "9119.06", title: "Use HVAC pressure, temperature, and flow measuring devices", req: "Read system operating pressures, temperatures, and airflow velocities.", tools: "Digital manifold gauges, clamp-on thermocouples, anemometer.", procedure: "1. Connect manifold hoses securely to service ports with minimal loss.\n2. Attach pipe clamps firmly with thermal paste for accurate superheat/subcooling.", passCriteria: "Obtains precise pressure and temperature readings to analyze cycle performance." },
+          { code: "9119.07", title: "Use HVAC specialty instruments", req: "Operate electronic micron gauges, electronic leak detectors, and psychrometers.", tools: "Micron gauge, heated diode leak detector, psychrometer.", procedure: "1. Connect micron gauge directly to system via core removal tool for accurate deep vacuum.\n2. Calibrate leak detector in clean air before scanning joints.", passCriteria: "Demonstrates expert proficiency with specialty diagnostic instruments." },
+          { code: "9119.08", title: "Use brazing, soldering, welding, cutting or purging equipment", req: "Perform nitrogen-purged oxy-acetylene brazing on copper refrigeration lines.", tools: "Oxy-acetylene torch, nitrogen tank, pressure regulator, Sil-Fos alloy.", procedure: "1. Flow 2-3 SCFH dry nitrogen through copper tubing during brazing.\n2. Heat joint evenly and feed filler metal until capillary action forms full ring.", passCriteria: "Produces leak-free, oxidized-free brazed joints capable of withstanding test pressures." },
+          { code: "9119.09", title: "Use digital technology", req: "Utilize smartphones, tablets, diagnostic apps, and cloud software for work orders.", tools: "Smartphone, tablet, diagnostic software.", procedure: "1. Access equipment manuals, wiring diagrams, and parts lookups digitally.", passCriteria: "Effectively leverages digital tools for technical research and job reporting." },
+          { code: "9119.10", title: "Use material handling equipment", req: "Operate hand trucks, dollies, and rigging straps to move condensers and air handlers.", tools: "Appliance hand truck, ratchet straps.", procedure: "1. Secure equipment firmly to hand truck with straps.\n2. Maintain balanced center of gravity when navigating stairs.", passCriteria: "Moves heavy HVAC equipment safely without property damage or injury." },
+          { code: "9119.11", title: "Use worker elevating equipment", req: "Set up and use step ladders and extension ladders safely on residential jobsites.", tools: "Extension ladder, stepladder, leveling feet.", procedure: "1. Position ladder at 4:1 ratio; secure top and bottom.\n2. Maintain 3 points of contact at all times.", passCriteria: "Demonstrates ladder safety setup and climbing protocols." }
+        ]
+      },
+      {
+        code: "9120",
+        title: "Plan and Prepare for the Installation, Maintenance, or Service of Residential HVAC Systems",
+        skills: [
+          { code: "9120.01", title: "Interpret job documentation", req: "Read engineering drawings, equipment submittal sheets, and manufacturer installation manuals.", tools: "Blueprints, submittal sheets.", procedure: "1. Review equipment electrical requirements, dimensions, and airflow specs.", passCriteria: "Accurately extracts all critical technical data from job documentation." },
+          { code: "9120.02", title: "Calculate heating and cooling load requirements", req: "Determine residential sensible and latent load calculations (Manual J principles).", tools: "Load calculation software / worksheet.", procedure: "1. Measure home square footage, window orientation, insulation levels, and occupancy.", passCriteria: "Performs accurate load calculation to size residential A/C or heat pump equipment." },
+          { code: "9120.03", title: "Select residential HVAC systems, components and equipment", req: "Choose matching AHRI-certified split system condensers, evaporator coils, and furnaces/air handlers.", tools: "AHRI directory, manufacturer sizing guides.", procedure: "1. Match outdoor unit tonnage and SEER2 rating with indoor evaporator coil.", passCriteria: "Selects properly sized, code-compliant equipment package." },
+          { code: "9120.04", title: "Identify design parameters of residential HVAC systems", req: "Determine design indoor/outdoor temperatures and required CFM per ton (350-400 CFM/ton).", tools: "Psychrometric chart, design tables.", procedure: "1. Establish outdoor design dry bulb/wet bulb and indoor comfort targets.", passCriteria: "Identifies correct design parameters for residential comfort systems." },
+          { code: "9120.05", title: "Calculate residential HVAC systems operating parameters", req: "Determine target superheat for fixed orifice systems and target subcooling for TXV systems.", tools: "P-T chart, manufacturer charging chart.", procedure: "1. Calculate target subcooling based on condenser rating plate data.", passCriteria: "Accurately computes design operating pressures and temperatures." },
+          { code: "9120.06", title: "Select residential HVAC systems operating and capacity controls", req: "Choose correct multi-stage thermostats, reversing valve controls, and staging relays.", tools: "Thermostat compatibility guide.", procedure: "1. Verify low voltage wire count (e.g., C, R, Y, W, G, O/B) and select appropriate thermostat.", passCriteria: "Selects appropriate control components for system operation." },
+          { code: "9120.07", title: "Select residential HVAC systems safety controls", req: "Specify high/low pressure switches, float switches, and thermal overloads.", tools: "Component catalog.", procedure: "1. Verify auxiliary condensate overflow float switch and compressor pressure cutouts.", passCriteria: "Selects required safety controls to protect equipment and property." },
+          { code: "9120.08", title: "Select residential HVAC systems accessories", req: "Choose humidifiers, UV lights, electronic air cleaners, and zoning dampers.", tools: "Accessory catalog.", procedure: "1. Match humidifier capacity with home volume and duct dimensions.", passCriteria: "Selects compatible and beneficial system accessories." },
+          { code: "9120.09", title: "Coordinate permits, inspections and sub-trades", req: "Ensure electrical and HVAC municipal permits are pulled and inspections scheduled.", tools: "Permit application forms.", procedure: "1. Submit electrical permit for branch circuit wiring as required by local authority.", passCriteria: "Coordinates permitting and regulatory inspection milestones." },
+          { code: "9120.10", title: "Complete planning work sheets", req: "Fill out equipment placement, material takeoff, and installation checklists.", tools: "Planning worksheet.", procedure: "1. List all required copper line set sizes, electrical whips, disconnects, and pads.", passCriteria: "Produces comprehensive and organized installation planning sheet." }
+        ]
+      },
+      {
+        code: "9121",
+        title: "Install Residential HVAC Systems, Components and Accessories",
+        skills: [
+          { code: "9121.01", title: "Inspect residential HVAC systems, equipment, components and accessories at worksite", req: "Uncrate equipment and inspect for shipping damage, dented coils, or loose terminals.", tools: "Flashlight, visual check.", procedure: "1. Inspect cabinet, electrical box, and fan blades prior to setting unit.", passCriteria: "Verifies equipment arrives undamaged and matches specifications." },
+          { code: "9121.02", title: "Perform a worksite evaluation", req: "Check level pad placement, outdoor airflow clearance, and indoor duct connection points.", tools: "Level, tape measure.", procedure: "1. Ensure condenser pad is level and elevated above snow line.", passCriteria: "Selects optimal installation location ensuring unobstructed airflow and service access." },
+          { code: "9121.03", title: "Prepare worksite for installation", req: "Lay out tools, protect floors, and prepare electrical and drain penetrations.", tools: "Drop cloths, core drill.", procedure: "1. Core drill refrigerant line and condensate drain penetrations through exterior wall.", passCriteria: "Prepares clean, safe worksite ready for mechanical installation." },
+          { code: "9121.04", title: "Coordinate material handling equipment and worker elevating platforms onsite", req: "Use rigging and dollies to position rooftop or elevated condenser units safely.", tools: "Harness, hoist, dollies.", procedure: "1. Rig unit securely using approved lifting straps and certified anchor points.", passCriteria: "Executes safe lifting and rigging operations." },
+          { code: "9121.05", title: "Coordinate mounting and support equipment", req: "Install vibration isolators, condenser pad, and wall brackets securely.", tools: "Concrete anchors, vibration pads, torque wrench.", procedure: "1. Bolt condenser securely to composite pad or wall brackets.", passCriteria: "Installs robust, vibration-dampened equipment mountings." },
+          { code: "9121.06", title: "Install residential HVAC systems, components and accessories", req: "Position and level air handler/furnace and outdoor condensing unit.", tools: "Level, hand tools.", procedure: "1. Level indoor unit and connect supply/return plenums with canvas connectors.", passCriteria: "Installs mechanical equipment plumb, level, and secure." },
+          { code: "9121.07", title: "Join residential HVAC systems piping, tubing and components", req: "Cut, deburr, bend, and nitrogen-purge braze copper line sets.", tools: "Tubing bender, nitrogen regulator, torch kit.", procedure: "1. Purge nitrogen at 3 SCFH while brazing suction and liquid lines.", passCriteria: "Creates professional, leak-free copper piping joints." },
+          { code: "9121.08", title: "Check residential HVAC system and components for gas and fluid leaks", req: "Pressurize system with dry nitrogen to 150-250 PSI and test with electronic leak detector / soap bubbles.", tools: "Nitrogen tank, pressure regulator, bubble solution, electronic leak detector.", procedure: "1. Pressurize system with nitrogen, hold for minimum 30 minutes, and check all joints.", passCriteria: "Verifies zero pressure drop and absence of leaks across entire refrigerant circuit." },
+          { code: "9121.09", title: "Evacuate residential HVAC system", req: "Perform deep vacuum evacuation using vacuum pump and micron gauge until pressure holds below 500 microns.", tools: "High-vacuum pump, electronic micron gauge, core removal tool.", procedure: "1. Remove Schrader cores, connect large-diameter vacuum hoses directly to manifold/system.\n2. Evacuate below 500 microns and perform vacuum rise test.", passCriteria: "Achieves and holds a deep vacuum under 500 microns, proving moisture and air removal." },
+          { code: "9121.10", title: "Install residential HVAC mechanical systems, components and accessories", req: "Install condensate drain traps, PVC piping, P-traps, and auxiliary drain pans.", tools: "PVC cutter, primer, cement.", procedure: "1. Glue PVC condensate drain with primer and solvent cement; slope at least 1/4 inch per foot.", passCriteria: "Installs functional, compliant condensate drainage system." },
+          { code: "9121.11", title: "Install residential HVAC electrical system components and accessories", req: "Mount fused disconnect, run outdoor whip, and wire low-voltage thermostat cable.", tools: "Wire strippers, screwdriver, multimeter.", procedure: "1. Route 18/8 thermostat wire from indoor unit to thermostat location and outdoor unit.", passCriteria: "Installs neat, code-compliant low and high voltage wiring." },
+          { code: "9121.12", title: "Install residential HVAC electronic systems, components and accessories", req: "Configure communicating thermostats, zone control panels, and smart sensors.", tools: "Screwdriver, smart device.", procedure: "1. Wire zoning control board and configure staging parameters in thermostat setup.", passCriteria: "Correctly installs and configures advanced electronic HVAC controls." },
+          { code: "9121.13", title: "Install branch circuit wiring for residential HVAC equipment (max 240V single-phase, 60A)", req: "Run armored cable (AC90) or conduit from electrical panel to fused disconnect per OESC.", tools: "Wire cutters, conduit bender, multimeter.", procedure: "1. Size conductors correctly for equipment MCA (Minimum Circuit Ampacity).\n2. Terminate securely at panel breaker and fused disconnect.", passCriteria: "Installs branch circuit wiring fully compliant with Ontario Electrical Safety Code." },
+          { code: "9121.14", title: "Charge residential HVAC systems with refrigerant", req: "Weigh in exact factory refrigerant charge plus line set adjustment using digital scale.", tools: "Electronic refrigerant charging scale, recovery cylinder, manifold.", procedure: "1. Calculate extra refrigerant needed for line set length exceeding factory pre-charge.\n2. Weigh liquid refrigerant into high side or vapor into low side per manufacturer specs.", passCriteria: "Charges system accurately by weight within manufacturer tolerances." },
+          { code: "9121.15", title: "Charge other fluids (glycol, oil, water, brines, processed chemicals)", req: "Fill hydronic or geothermal closed loop systems with proper propylene glycol mix.", tools: "Glycol refractometer, transfer pump.", procedure: "1. Test freezing point using refractometer and adjust glycol concentration.", passCriteria: "Ensures correct fluid concentration and system freeze protection." }
+        ]
+      },
+      {
+        code: "9122",
+        title: "Maintain Residential HVAC Systems, Components and Accessories",
+        skills: [
+          { code: "9122.01", title: "Maintain residential HVAC filters, strainers and components", req: "Inspect and replace disposable or clean permanent air filters during maintenance visits.", tools: "New air filters, vacuum.", procedure: "1. Slide out dirty filter, check MERV rating, and install clean filter in correct airflow direction.", passCriteria: "Maintains optimal airflow and indoor air quality through timely filter service." },
+          { code: "9122.02", title: "Maintain residential HVAC condenser, evaporator, components and accessories", req: "Wash outdoor condenser coils with non-acidic coil cleaner and flush condensate drain.", tools: "Coil cleaner, garden hose / sprayer, fin comb.", procedure: "1. Spray coil cleaner from inside out, rinse gently, and straighten bent fins with fin comb.", passCriteria: "Restores coil heat transfer efficiency and coil cleanliness." },
+          { code: "9122.03", title: "Maintain residential HVAC humidifier, components and accessories", req: "Replace water evaporator pad (scale pad) and clean humidifier water trough and solenoid.", tools: "Replacement water panel, scale remover.", procedure: "1. Shut off water supply, remove cover, replace water panel, and check drain line.", passCriteria: "Ensures hygienic and reliable humidification operation." },
+          { code: "9122.04", title: "Maintain residential HVAC electrical components", req: "Check contactor points for pitting, tighten electrical terminal screws, and test run capacitors.", tools: "Multimeter with capacitance function, insulated screwdriver.", procedure: "1. Measure capacitor microfarads against rated +/- 5% tolerance.\n2. Tighten all contractor and terminal block connections.", passCriteria: "Identifies worn electrical components before catastrophic failure occurs." },
+          { code: "9122.05", title: "Maintain residential HVAC actuator and damper/zone controls", req: "Test motorized zone dampers, check actuator linkage, and verify thermostat communication.", tools: "Multimeter, hand tools.", procedure: "1. Cycle zone dampers manually and verify electrical opening/closing response.", passCriteria: "Ensures smooth zone airflow distribution and damper actuation." }
+        ]
+      },
+      {
+        code: "9123",
+        title: "Service Residential HVAC Systems, Components and Accessories",
+        skills: [
+          { code: "9123.01", title: "Troubleshoot residential HVAC systems, components and accessories", req: " Diagnose electrical, mechanical, and airflow faults using systematic troubleshooting flowchart.", tools: "Multimeter, manifold gauges, thermometer.", procedure: "1. Verify power supply, check thermostat call, test safety switches, and measure operating pressures.", passCriteria: "Accurately diagnoses complex HVAC system failures efficiently." },
+          { code: "9123.02", title: "Repair residential HVAC components and accessories", req: "Replace faulty contactors, capacitors, transformers, fan motors, or pressure switches.", tools: "Hand tools, replacement parts, multimeter.", procedure: "1. LOTO power, disconnect wiring, unbolt failed component, and install OEM replacement.", passCriteria: "Performs clean, professional component replacement returning unit to proper operation." },
+          { code: "9123.03", title: "Repair residential HVAC mechanical components and accessories", req: "Align blower wheels, replace direct-drive or belt-driven motors, and adjust fan pulleys.", tools: "Allen wrenches, puller, tachometer.", procedure: "1. Loosen set screw, position blower wheel centered in housing, and torque set screw.", passCriteria: "Restores mechanical balance, smooth rotation, and proper airflow." },
+          { code: "9123.04", title: "Replace residential HVAC compressors", req: "Perform burnout cleanup, compressor replacement, filter-drier replacement, and evacuation.", tools: "Recovery machine, torch, nitrogen, vacuum pump, micron gauge.", procedure: "1. Recover refrigerant, cut out failed compressor, flush line if burned out, braze new compressor and new filter-drier in place.", passCriteria: "Executes textbook compressor replacement with zero moisture or oxidation." },
+          { code: "9123.05", title: "Repair residential HVAC controls and systems", req: "Troubleshoot and replace faulty electronic control boards or thermostat wiring.", tools: "Multimeter, wire strippers.", procedure: "1. Test control board transformer output (24VAC) and trace input/output relay signals.", passCriteria: "Restores reliable electronic control logic and system automation." },
+          { code: "9123.06", title: "Repair residential HVAC electrical, electronic and DDC systems and components", req: "Repair or replace low-voltage control transformers, relays, and sensor inputs.", tools: "Multimeter, soldering iron.", procedure: "1. Test transformer primary/secondary winding continuity and replace if shorted.", passCriteria: "Ensures safe, robust electrical control circuit operation." },
+          { code: "9123.07", title: "Repair residential HVAC system wiring", req: "Fix damaged wire harnesses, corroded splices, or shorted thermostat cables.", tools: "Wire strippers, heat shrink connectors, crimper.", procedure: "1. Cut out damaged wire section, crimp heat-shrink butt connector, and seal with heat gun.", passCriteria: "Performs secure, insulated electrical wiring repairs." },
+          { code: "9123.08", title: "Repair residential HVAC piping, components and accessories", req: "Repair cracked copper lines, leaking service valves, or broken condensate tubing.", tools: "Torch, tubing cutter, nitrogen regulator.", procedure: "1. Recover refrigerant, purge with nitrogen, cut out leaking section, and braze repair coupling.", passCriteria: "Repairs piping securely and passes subsequent pressure/leak tests." },
+          { code: "9123.09", title: "Repair residential HVAC refrigerant systems, components, accessories and metering devices", req: "Replace thermal expansion valves (TXV), filter-driers, or fixed orifice pistons.", tools: "Torch, insulated wrap, recovery machine.", procedure: "1. Recover refrigerant, wrap TXV bulb in wet rag to protect power head during brazing, and replace.", passCriteria: "Installs metering devices correctly ensuring proper superheat control." },
+          { code: "9123.10", title: "Repair residential HVAC prime movers (compressors)", req: "Diagnose compressor internal mechanical lock, open windings, or grounded motor.", tools: "Megohmmeter (megger), digital multimeter.", procedure: "1. Test compressor winding resistance to ground and between terminals (C-R-S).", passCriteria: "Accurately tests and diagnoses compressor electrical health." },
+          { code: "9123.11", title: "Repair residential HVAC pneumatics", req: "Service pneumatic thermostats, air compressors, and pneumatic damper actuators.", tools: "Pressure gauge, calibration wrench.", procedure: "1. Check main air supply pressure (normally 15-20 PSI) and calibrate pneumatic thermostats.", passCriteria: "Maintains accurate pneumatic control pressure and actuation." },
+          { code: "9123.12", title: "Repair variable air volume (VAV) components", req: "Service VAV terminal boxes, electronic controllers, and damper actuators.", tools: "Multimeter, balancing hood.", procedure: "1. Test VAV controller power and calibrate flow pickup tubes.", passCriteria: "Ensures correct VAV airflow modulation and comfort control." },
+          { code: "9123.13", title: "Adjust heat transfer medium fluids", req: "Adjust water flow, balancing valves, or glycol concentration in hydronic systems.", tools: "Flow meter, refractometer.", procedure: "1. Measure fluid temperature drop and adjust balancing valves to design flow.", passCriteria: "Achieves correct heat transfer fluid flow rates and temperatures." },
+          { code: "9123.14", title: "Check residential HVAC systems for leakage", req: "Scan all joints and valves using electronic heated diode leak detector under pressure.", tools: "Electronic leak detector, UV dye kit.", procedure: "1. Systematically pass leak detector probe slowly (1 inch per second) beneath all joints.", passCriteria: "Locates and verifies refrigerant leaks with pinpoint precision." },
+          { code: "9123.15", title: "Check operations and functions of total system", req: "Perform complete operational cycle test from thermostat call through defrost/cooling stages.", tools: "Manifold gauges, thermometer.", procedure: "1. Run full heating and cooling sequence, verifying all safeties and staging." , passCriteria: "Verifies 100% flawless system operation across all modes." },
+          { code: "9123.16", title: "Decommission packaged and split system HVAC equipment for resale, renovation, or storage", req: "Safely pump down or recover refrigerant, disconnect power, and cap lines.", tools: "Recovery machine, recovery cylinders, wrench.", procedure: "1. Pump refrigerant into outdoor unit or recover entirely; cap all open copper lines.", passCriteria: "Decommissions equipment cleanly adhering to environmental and safety rules." },
+          { code: "9123.17", title: "Decommission residential HVAC equipment for demolition", req: "Perform total refrigerant evacuation, electrical disconnect, and gas capping for scrap.", tools: "Recovery unit, torch, capping tools.", procedure: "1. Verify zero refrigerant remaining; disconnect power and cap gas/oil lines.", passCriteria: "Prepares equipment safely for building demolition or recycling." }
+        ]
+      },
+      {
+        code: "9124",
+        title: "Commission Residential HVAC Systems, Components and Accessories",
+        skills: [
+          { code: "9124.01", title: "Interpret residential HVAC installation and start-up documentation", req: "Review manufacturer commissioning checklist and start-up guide specifications.", tools: "Commissioning sheet.", procedure: "1. Verify all pre-start installation conditions are met prior to energizing system.", passCriteria: "Understands and prepares for rigorous equipment commissioning protocols." },
+          { code: "9124.02", title: "Start-up residential HVAC systems, components and accessories for commissioning", req: "Energize system crankcase heater (if applicable), power up indoor/outdoor units, and test initial operation.", tools: "Multimeter, manifold gauges.", procedure: "1. Energize disconnect, allow crankcase heater to warm compressor, and initiate call for cooling.", passCriteria: "Executes safe, controlled initial system start-up." },
+          { code: "9124.03", title: "Set residential HVAC electrical, electronic, and automated control systems", req: "Program thermostat parameters, fan delays, staging differentials, and Wi-Fi features.", tools: "Thermostat, manual.", procedure: "1. Configure cycle rates, compressor lockout timers, and staging options.", passCriteria: "Calibrates electronic controls for maximum comfort and equipment protection." },
+          { code: "9124.04", title: "Check air flow, water and glycol levels", req: "Measure static pressure, calculate CFM, and verify hydronic flow rates.", tools: "Digital manometer, pitot tube / static pressure tips.", procedure: "1. Measure total external static pressure (ESP) and compare with blower performance chart.", passCriteria: "Verifies airflow matches design specification (350-400 CFM/ton)." },
+          { code: "9124.05", title: "Verify charging of residential HVAC system", req: "Measure superheat (fixed orifice) or subcooling (TXV) and verify charge matches rating plate.", tools: "Digital manifold gauges, pipe clamp thermocouples.", procedure: "1. Read liquid pressure/temperature for subcooling; suction pressure/temperature for superheat.", passCriteria: "Confirms refrigerant charge is 100% dialed in for optimal efficiency." },
+          { code: "9124.06", title: "Verify residential HVAC system operating parameters", req: "Measure compressor running amperage (FLA), voltage drop, and temperature split (delta T).", tools: "Clamp meter, digital thermometer.", procedure: "1. Measure supply vs. return air temperature split and compressor operating current.", passCriteria: "Confirms all operating parameters fall within manufacturer engineering limits." },
+          { code: "9124.07", title: "Commission residential HVAC system", req: "Complete final commissioning sign-off sheet, review operation with client, and file warranty.", tools: "Commissioning report.", procedure: "1. Present completed commissioning document and warranty registration to homeowner.", passCriteria: "Successfully commissions residential A/C system with professional documentation." }
+        ]
+      }
+    ];
+
+    const SKILL_LOOKUP = {};
+    SKILL_SETS.forEach(set => {
+      set.skills.forEach(s => {
+        SKILL_LOOKUP[s.code] = { ...s, setCode: set.code, setTitle: set.title };
+      });
+    });
+
+    window.SKILL_SETS = SKILL_SETS;
+    window.SKILL_LOOKUP = SKILL_LOOKUP;
+
+    // Firebase Initialization & Sync Setup
+    const appId = typeof __app_id !== 'undefined' ? __app_id : '313d-default-app';
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+    let app, db, auth, currentUser = null;
+    let isRemoteUpdate = false;
+
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      auth = getAuth(app);
+    } catch (e) {
+      console.warn("Firebase initialization warning:", e);
+    }
+
+    async function initFirebase() {
+      const dotEl = document.getElementById('cloud-dot');
+      const textEl = document.getElementById('cloud-text');
+      const mDot = document.getElementById('mobile-cloud-dot');
+      const mText = document.getElementById('mobile-cloud-text');
+      const mId = document.getElementById('mobile-sync-id');
+
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+        currentUser = auth.currentUser;
+        if (currentUser) {
+          if (dotEl) { dotEl.className = "w-2 h-2 rounded-full bg-emerald-400"; }
+          if (textEl) { textEl.textContent = "Cloud Synced (Live)"; }
+          if (mDot) { mDot.className = "w-2 h-2 rounded-full bg-emerald-400"; }
+          if (mText) { mText.textContent = "Cloud Synced"; }
+          if (mId) { mId.textContent = currentUser.uid.substring(0, 6) + '...'; }
+
+          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'logbook_state_v1');
+          
+          onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+              const remoteData = docSnap.data();
+              if (remoteData && !isRemoteUpdate) {
+                window.appState = {
+                  ...window.appState,
+                  ...remoteData,
+                  profile: { ...window.appState.profile, ...(remoteData.profile || {}) },
+                  schoolLevels: { ...window.appState.schoolLevels, ...(remoteData.schoolLevels || {}) },
+                  ui: { ...window.appState.ui, ...(remoteData.ui || {}) }
+                };
+                window.saveStateLocalOnly();
+                window.refreshAllViews();
+              }
+            }
+          }, (error) => {
+            console.error("Firestore sync error:", error);
+            if (textEl) textEl.textContent = "Cloud Sync Error (Using Local)";
+          });
+        }
+      } catch (err) {
+        console.error("Auth / Cloud connection error:", err);
+        if (textEl) textEl.textContent = "Offline Mode (Local Only)";
+      }
+    }
+
+    window.pushToFirestore = async function() {
+      if (!db || !currentUser) return;
+      try {
+        isRemoteUpdate = true;
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'logbook_state_v1');
+        await setDoc(docRef, window.appState, { merge: true });
+        setTimeout(() => { isRemoteUpdate = false; }, 400);
+      } catch (err) {
+        console.error("Error saving to Firestore:", err);
+        isRemoteUpdate = false;
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initFirebase();
+    });
+  </script>
+
+  <!-- Application Logic -->
+  <script>
+    const STORAGE_KEY = 'sto_313d_logbook_cloud_v1';
+
+    window.appState = {
+      profile: {
+        apprenticeName: 'Adam Smith',
+        agreementNum: '',
+        stoNum: '',
+        sponsorName: '',
+        sponsorContact: '',
+        startDate: ''
+      },
+      trainers: [],
+      signOffs: {},
+      hoursLog: [],
+      schoolLevels: { level1: false, level2: false },
+      ui: { collapsedSets: {} }
+    };
+
+    let currentTab = 'logbook';
+    let statusFilter = 'ALL';
+    let batchMode = false;
+    let batchSelected = new Set();
+    let activeModalSkillCodes = [];
+    let criteriaActiveSkillCode = null;
+    let confirmCallback = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          window.appState = {
+            ...window.appState,
+            ...parsed,
+            profile: { ...window.appState.profile, ...(parsed.profile || {}) },
+            schoolLevels: { ...window.appState.schoolLevels, ...(parsed.schoolLevels || {}) },
+            ui: { ...window.appState.ui, ...(parsed.ui || {}) }
+          };
+        }
+      } catch (err) {
+        console.error('Error loading local storage:', err);
+      }
+    }
+
+    function checkPinLockStatus() {
+      const overlay = document.getElementById('pin-lock-overlay');
+      const titleEl = document.getElementById('pin-modal-title');
+      const descEl = document.getElementById('pin-modal-desc');
+      const submitBtn = document.getElementById('pin-submit-btn');
+
+      titleEl.textContent = "Private Logbook Locked";
+      descEl.textContent = "Enter PIN (4747) to unlock your secure apprenticeship records.";
+      submitBtn.textContent = "Unlock Logbook";
+      overlay.classList.remove('hidden');
+    }
+
+    function handlePinSubmit(e) {
+      e.preventDefault();
+      const pinInput = document.getElementById('pin-input').value.trim();
+
+      if (pinInput === '4747') {
+        document.getElementById('pin-lock-overlay').classList.add('hidden');
+        document.getElementById('pin-input').value = '';
+        showToast('Logbook unlocked.');
+      } else {
+        showToast('Incorrect PIN. (Hint: 4747)', 'error');
+        document.getElementById('pin-input').value = '';
+      }
+    }
+
+    function lockApp() {
+      document.getElementById('pin-input').value = '';
+      checkPinLockStatus();
+      showToast('Logbook locked.');
+    }
+
+    window.saveStateLocalOnly = function() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
+      } catch (err) {
+        console.error('Local storage quota exceeded:', err);
+      }
+      updateDashboardKPIs();
+    }
+
+    function saveState() {
+      window.saveStateLocalOnly();
+      if (typeof window.pushToFirestore === 'function') {
+        window.pushToFirestore();
+      }
+    }
+
+    window.refreshAllViews = function() {
+      updateDashboardKPIs();
+      if (currentTab === 'logbook') renderLogbook();
+      if (currentTab === 'guide') renderTrainingGuide();
+      if (currentTab === 'hours') renderHoursTab();
+      if (currentTab === 'profile') renderProfileTab();
+      if (currentTab === 'audit') renderAuditReport();
+    }
+
+    function switchTab(tabName) {
+      currentTab = tabName;
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('border-amber-500', 'text-amber-400');
+          btn.classList.remove('border-transparent', 'text-slate-300');
+        } else {
+          btn.classList.remove('border-amber-500', 'text-amber-400');
+          btn.classList.add('border-transparent', 'text-slate-300');
+        }
+      });
+
+      document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('text-amber-400');
+          btn.classList.remove('text-slate-400');
+        } else {
+          btn.classList.remove('text-amber-400');
+          btn.classList.add('text-slate-400');
+        }
+      });
+
+      window.refreshAllViews();
+      lucide.createIcons();
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bg = type === 'error' ? 'bg-rose-700' : 'bg-slate-900 border border-amber-500/60';
+      toast.className = `${bg} text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transition-all duration-300`;
+      toast.innerHTML = `
+        <i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle-2'}" class="w-4 h-4 ${type === 'error' ? 'text-rose-200' : 'text-amber-400'} shrink-0"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      lucide.createIcons();
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    function openConfirmModal(title, message, onConfirm) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      confirmCallback = onConfirm;
+      document.getElementById('confirm-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeConfirmModal(confirmed) {
+      document.getElementById('confirm-modal').classList.add('hidden');
+      if (confirmed && typeof confirmCallback === 'function') {
+        confirmCallback();
+      }
+      confirmCallback = null;
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getTodayISO() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset();
+      const local = new Date(now.getTime() - offset * 60000);
+      return local.toISOString().split('T')[0];
+    }
+
+    // KPI & Stats Calculation
+    function getStats() {
+      const totalSkills = 91;
+      const signedCount = Object.keys(window.appState.signOffs).length;
+      const skillsPct = Math.round((signedCount / totalSkills) * 100);
+
+      let setsReadyCount = 0;
+      const setBreakdown = SKILL_SETS.map(set => {
+        const total = set.skills.length;
+        const signed = set.skills.filter(s => Boolean(window.appState.signOffs[s.code])).length;
+        const pct = Math.round((signed / total) * 100);
+        const meets80 = pct >= 80;
+        if (meets80) setsReadyCount++;
+        return { ...set, total, signed, pct, meets80 };
+      });
+
+      const otjHours = window.appState.hoursLog.reduce((sum, item) => sum + (parseFloat(item.hours) || 0), 0);
+      const schoolHours = (window.appState.schoolLevels.level1 ? 240 : 0) + (window.appState.schoolLevels.level2 ? 240 : 0);
+      const totalHours = otjHours + schoolHours;
+
+      return { totalSkills, signedCount, skillsPct, setsReadyCount, setBreakdown, otjHours, schoolHours, totalHours };
+    }
+
+    function updateDashboardKPIs() {
+      const stats = getStats();
+
+      document.getElementById('header-skills-count').textContent = `${stats.signedCount} / ${stats.totalSkills}`;
+      document.getElementById('header-hours-count').textContent = `${stats.totalHours.toLocaleString()} / 4,500`;
+      if (window.appState.profile.apprenticeName) {
+        document.getElementById('header-subtitle').textContent = `Apprentice: ${window.appState.profile.apprenticeName}${window.appState.profile.stoNum ? ' • ' + window.appState.profile.stoNum : ''}`;
+      }
+
+      document.getElementById('kpi-skills').textContent = `${stats.signedCount} / ${stats.totalSkills}`;
+      document.getElementById('kpi-skills-pct').textContent = `${stats.skillsPct}%`;
+      document.getElementById('kpi-skills-bar').style.width = `${stats.skillsPct}%`;
+
+      document.getElementById('kpi-skillsets').textContent = `${stats.setsReadyCount} / 8`;
+
+      document.getElementById('kpi-otj-hours').textContent = stats.otjHours.toLocaleString();
+      const otjPct = Math.min(100, Math.round((stats.otjHours / 4020) * 100));
+      document.getElementById('kpi-otj-bar').style.width = `${otjPct}%`;
+
+      document.getElementById('kpi-total-hours').textContent = stats.totalHours.toLocaleString();
+      document.getElementById('kpi-school-sub').textContent = `Includes ${stats.schoolHours} / 480 in-school hrs`;
+    }
+
+    // Logbook rendering & filtering
+    function setStatusFilter(status) {
+      statusFilter = status;
+      document.querySelectorAll('.status-pill').forEach(btn => {
+        if (btn.dataset.status === status) {
+          btn.className = 'status-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white transition';
+        } else {
+          btn.className = 'status-pill px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        }
+      });
+      renderLogbook();
+    }
+
+    function clearSearch() {
+      document.getElementById('skill-search').value = '';
+      renderLogbook();
+    }
+
+    function toggleSetCollapse(setCode) {
+      window.appState.ui.collapsedSets[setCode] = !window.appState.ui.collapsedSets[setCode];
+      saveState();
+      renderLogbook();
+    }
+
+    function expandCollapseAll(expand) {
+      SKILL_SETS.forEach(s => {
+        window.appState.ui.collapsedSets[s.code] = !expand;
+      });
+      saveState();
+      renderLogbook();
+    }
+
+    function toggleBatchMode() {
+      batchMode = !batchMode;
+      batchSelected.clear();
+      const btn = document.getElementById('batch-mode-btn');
+      const bar = document.getElementById('batch-action-bar');
+      if (batchMode) {
+        btn.classList.remove('bg-amber-500', 'text-slate-950');
+        btn.classList.add('bg-slate-800', 'text-amber-400');
+        btn.innerHTML = `<i data-lucide="x" class="w-4 h-4"></i><span>Exit Batch</span>`;
+        bar.classList.remove('hidden');
+      } else {
+        btn.classList.add('bg-amber-500', 'text-slate-950');
+        btn.classList.remove('bg-slate-800', 'text-amber-400');
+        btn.innerHTML = `<i data-lucide="layers" class="w-4 h-4"></i><span>Batch Sign-Off</span>`;
+        bar.classList.add('hidden');
+      }
+      updateBatchCount();
+      renderLogbook();
+    }
+
+    function toggleBatchSkill(skillCode) {
+      if (batchSelected.has(skillCode)) {
+        batchSelected.delete(skillCode);
+      } else {
+        batchSelected.add(skillCode);
+      }
+      updateBatchCount();
+    }
+
+    function clearBatchSelection() {
+      batchSelected.clear();
+      updateBatchCount();
+      renderLogbook();
+    }
+
+    function updateBatchCount() {
+      document.getElementById('batch-selected-count').textContent = batchSelected.size;
+    }
+
+    function renderLogbook() {
+      const container = document.getElementById('skillsets-container');
+      const query = document.getElementById('skill-search').value.trim().toLowerCase();
+      const setFilter = document.getElementById('skillset-filter').value;
+
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (query) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+
+      const stats = getStats();
+      let html = '';
+      let totalVisibleSkills = 0;
+
+      stats.setBreakdown.forEach(set => {
+        if (setFilter !== 'ALL' && set.code !== setFilter) return;
+
+        const matchingSkills = set.skills.filter(skill => {
+          const isSigned = Boolean(window.appState.signOffs[skill.code]);
+          if (statusFilter === 'SIGNED' && !isSigned) return false;
+          if (statusFilter === 'PENDING' && isSigned) return false;
+          if (query) {
+            const hay = `${skill.code} ${skill.title} ${skill.req} ${skill.tools} ${skill.passCriteria} ${set.title}`.toLowerCase();
+            if (!hay.includes(query)) return false;
+          }
+          return true;
+        });
+
+        if (matchingSkills.length === 0) return;
+        totalVisibleSkills += matchingSkills.length;
+
+        const isCollapsed = Boolean(window.appState.ui.collapsedSets[set.code]) && !query;
+        const badgeHTML = set.meets80
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+               <i data-lucide="badge-check" class="w-3.5 h-3.5"></i> 80% Met
+             </span>`
+          : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+               ${set.pct}% (80% Target)
+             </span>`;
+
+        html += `
+          <div class="bg-white rounded-xl border ${set.meets80 ? 'border-emerald-300' : 'border-slate-200'} shadow-sm overflow-hidden">
+            <div class="p-3.5 sm:p-4 bg-slate-50/90 hover:bg-slate-100/80 transition">
+              <div class="flex items-start justify-between gap-3">
+                <div class="space-y-1 cursor-pointer select-none" onclick="toggleSetCollapse('${set.code}')">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2 py-0.5 rounded-md bg-slate-900 text-amber-400 font-extrabold text-xs">
+                      SKILL SET ${set.code}
+                    </span>
+                    ${badgeHTML}
+                  </div>
+                  <h3 class="font-bold text-slate-900 text-sm sm:text-base">${escapeHTML(set.title)}</h3>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <button onclick="switchTab('guide')" title="View STO Training Guide" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold flex items-center gap-1 border border-amber-200">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Standards
+                  </button>
+                  <div class="text-right cursor-pointer select-none" onclick="toggleSetCollapse('${set.code}')">
+                    <div class="text-sm font-extrabold ${set.meets80 ? 'text-emerald-700' : 'text-slate-800'}">${set.signed} / ${set.total}</div>
+                    <div class="text-[11px] text-slate-500">signed</div>
+                  </div>
+                  <i data-lucide="${isCollapsed ? 'chevron-down' : 'chevron-up'}" class="w-5 h-5 text-slate-400 cursor-pointer" onclick="toggleSetCollapse('${set.code}')"></i>
+                </div>
+              </div>
+              <div class="relative w-full h-2.5 bg-slate-200 rounded-full mt-3 overflow-hidden cursor-pointer" onclick="toggleSetCollapse('${set.code}')">
+                <div class="${set.meets80 ? 'bg-emerald-500' : 'bg-amber-500'} h-full rounded-full transition-all duration-300" style="width: ${set.pct}%"></div>
+                <div class="absolute top-0 bottom-0 left-[80%] w-0.5 bg-slate-900/40"></div>
+              </div>
+            </div>
+
+            <div class="${isCollapsed ? 'hidden' : 'divide-y divide-slate-100'}">
+              ${matchingSkills.map(skill => {
+                const signData = window.appState.signOffs[skill.code];
+                const isSigned = Boolean(signData);
+                const isChecked = batchSelected.has(skill.code);
+
+                if (batchMode) {
+                  return `
+                    <label class="flex items-center gap-3 p-3.5 hover:bg-amber-50/50 cursor-pointer transition">
+                      <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleBatchSkill('${skill.code}')" class="w-5 h-5 rounded text-amber-500 focus:ring-amber-500 border-slate-300 shrink-0" />
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                          <span class="font-mono text-xs font-bold text-slate-600">${skill.code}</span>
+                          ${isSigned ? '<span class="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded">SIGNED</span>' : ''}
+                        </div>
+                        <div class="text-sm font-medium text-slate-900">${escapeHTML(skill.title)}</div>
+                      </div>
+                    </label>
+                  `;
+                }
+
+                return `
+                  <div class="p-3.5 sm:px-4 hover:bg-slate-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3 min-w-0 flex-1 cursor-pointer" onclick="openCriteriaModal('${skill.code}')">
+                      <div class="mt-0.5 shrink-0">
+                        ${isSigned
+                          ? `<div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center border border-emerald-300">
+                               <i data-lucide="check" class="w-4 h-4"></i>
+                             </div>`
+                          : `<div class="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-300">
+                               <i data-lucide="circle" class="w-3.5 h-3.5"></i>
+                             </div>`
+                        }
+                      </div>
+                      <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <span class="font-mono text-xs font-bold ${isSigned ? 'text-emerald-700' : 'text-slate-500'}">${skill.code}</span>
+                          ${isSigned
+                            ? `<span class="text-[11px] font-medium text-slate-500">Signed ${escapeHTML(signData.date)} by <strong>${escapeHTML(signData.trainerName)}</strong></span>`
+                            : `<span class="text-[11px] text-amber-700 font-medium">Tap to view STO criteria &amp; sign off</span>`
+                          }
+                        </div>
+                        <div class="text-sm font-medium ${isSigned ? 'text-slate-900' : 'text-slate-800'} leading-snug mt-0.5">
+                          ${escapeHTML(skill.title)}
+                        </div>
+                        ${isSigned && signData.notes ? `<div class="text-xs text-slate-500 mt-1 italic">Note: ${escapeHTML(signData.notes)}</div>` : ''}
+                      </div>
+                    </div>
+
+                    <div class="shrink-0 flex items-center gap-2 self-end sm:self-center">
+                      ${isSigned && signData.signatureDataUrl
+                        ? `<img src="${signData.signatureDataUrl}" alt="Signature" class="h-8 w-16 object-contain border border-slate-200 rounded bg-white hidden sm:block" />`
+                        : ''
+                      }
+                      <button onclick="openCriteriaModal('${skill.code}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600"></i> STO Criteria
+                      </button>
+                      <button onclick="openSingleSignModal('${skill.code}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold ${isSigned ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-amber-500 text-slate-950 hover:bg-amber-600'} shadow-sm">
+                        ${isSigned ? 'Edit Sign' : 'Sign Off'}
+                      </button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      if (totalVisibleSkills === 0) {
+        html = `
+          <div class="bg-white rounded-xl p-8 text-center border border-slate-200 space-y-2">
+            <i data-lucide="search-x" class="w-10 h-10 text-slate-400 mx-auto"></i>
+            <h3 class="font-bold text-slate-800">No matching competencies found</h3>
+            <p class="text-xs text-slate-500">Try clearing your search filter or switching back to "All" skills.</p>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function renderTrainingGuide() {
+      const container = document.getElementById('training-guide-list');
+      let html = '';
+
+      SKILL_SETS.forEach(set => {
+        html += `
+          <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-2">
+              <div>
+                <span class="px-2 py-0.5 rounded-md bg-slate-900 text-amber-400 font-extrabold text-xs">
+                  SKILL SET ${set.code}
+                </span>
+                <h3 class="font-bold text-slate-900 text-base mt-1">${escapeHTML(set.title)}</h3>
+              </div>
+              <span class="text-xs font-semibold text-slate-600 bg-white px-3 py-1 rounded-lg border border-slate-200 self-start sm:self-auto">
+                ${set.skills.length} Competencies
+              </span>
+            </div>
+
+            <div class="space-y-3 pt-1">
+              ${set.skills.map(s => `
+                <div class="bg-white p-3.5 rounded-xl border border-slate-200 space-y-2">
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">${s.code}</span>
+                      <span class="font-bold text-slate-900 text-sm">${escapeHTML(s.title)}</span>
+                    </div>
+                    <button onclick="openSingleSignModal('${s.code}')" class="px-2.5 py-1 rounded bg-slate-900 text-white text-[11px] font-bold shrink-0">
+                      ${window.appState.signOffs[s.code] ? 'Signed' : 'Sign Off'}
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                      <div class="font-bold text-slate-900 text-amber-800 mb-0.5">Requirement:</div>
+                      <p class="text-slate-700">${escapeHTML(s.req)}</p>
+                    </div>
+                    <div class="bg-blue-50/60 p-2.5 rounded-lg border border-blue-200">
+                      <div class="font-bold text-blue-900 mb-0.5">Tools &amp; Instruments:</div>
+                      <p class="text-blue-950">${escapeHTML(s.tools)}</p>
+                    </div>
+                    <div class="bg-emerald-50/60 p-2.5 rounded-lg border border-emerald-200">
+                      <div class="font-bold text-emerald-900 mb-0.5">Pass Criteria:</div>
+                      <p class="text-emerald-950">${escapeHTML(s.passCriteria)}</p>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // Criteria Modal logic
+    function openCriteriaModal(skillCode) {
+      criteriaActiveSkillCode = skillCode;
+      const skill = SKILL_LOOKUP[skillCode];
+      if (!skill) return;
+
+      document.getElementById('crit-modal-code').textContent = `COMPETENCY ${skill.code} • SKILL SET ${skill.setCode}`;
+      document.getElementById('crit-modal-title').textContent = skill.title;
+      document.getElementById('crit-modal-req').textContent = skill.req;
+      document.getElementById('crit-modal-tools').textContent = skill.tools;
+      document.getElementById('crit-modal-criteria').textContent = skill.passCriteria;
+      document.getElementById('crit-modal-proc').textContent = skill.procedure;
+
+      document.getElementById('criteria-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeCriteriaModal() {
+      document.getElementById('criteria-modal').classList.add('hidden');
+      criteriaActiveSkillCode = null;
+    }
+
+    function proceedToSignFromCriteria() {
+      const code = criteriaActiveSkillCode;
+      closeCriteriaModal();
+      if (code) {
+        openSingleSignModal(code);
+      }
+    }
+
+    // Signature Pad & Modal logic
+    let sigCanvas, sigCtx;
+    let isDrawing = false;
+    let hasSignatureStrokes = false;
+
+    function initSignaturePad() {
+      sigCanvas = document.getElementById('signature-pad');
+      sigCtx = sigCanvas.getContext('2d');
+
+      function resizeCanvas() {
+        const rect = sigCanvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        sigCanvas.width = rect.width * dpr;
+        sigCanvas.height = rect.height * dpr;
+        sigCtx.scale(dpr, dpr);
+        sigCtx.lineWidth = 2.4;
+        sigCtx.lineCap = 'round';
+        sigCtx.lineJoin = 'round';
+        sigCtx.strokeStyle = '#0f172a';
+      }
+
+      window.addEventListener('resize', () => {
+        if (!document.getElementById('signoff-modal').classList.contains('hidden')) {
+          resizeCanvas();
+        }
+      });
+
+      function getPos(e) {
+        const rect = sigCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      }
+
+      function startDraw(e) {
+        e.preventDefault();
+        isDrawing = true;
+        hasSignatureStrokes = true;
+        document.getElementById('sig-placeholder').classList.add('hidden');
+        const pos = getPos(e);
+        sigCtx.beginPath();
+        sigCtx.moveTo(pos.x, pos.y);
+      }
+
+      function moveDraw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        sigCtx.lineTo(pos.x, pos.y);
+        sigCtx.stroke();
+      }
+
+      function endDraw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        isDrawing = false;
+      }
+
+      sigCanvas.addEventListener('mousedown', startDraw);
+      sigCanvas.addEventListener('mousemove', moveDraw);
+      sigCanvas.addEventListener('mouseup', endDraw);
+      sigCanvas.addEventListener('mouseleave', endDraw);
+
+      sigCanvas.addEventListener('touchstart', startDraw, { passive: false });
+      sigCanvas.addEventListener('touchmove', moveDraw, { passive: false });
+      sigCanvas.addEventListener('touchend', endDraw, { passive: false });
+
+      sigCanvas._resize = resizeCanvas;
+    }
+
+    function clearSignaturePad() {
+      if (!sigCanvas || !sigCtx) return;
+      const rect = sigCanvas.getBoundingClientRect();
+      sigCtx.clearRect(0, 0, rect.width, rect.height);
+      hasSignatureStrokes = false;
+      document.getElementById('sig-placeholder').classList.remove('hidden');
+    }
+
+    function populateModalTrainerDropdown() {
+      const sel = document.getElementById('modal-trainer-select');
+      sel.innerHTML = `<option value="CUSTOM">-- Select Registered Trainer or Type Below --</option>`;
+      window.appState.trainers.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.id;
+        opt.textContent = `${t.name} (CofQ: ${t.cofq})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function handleTrainerSelectChange() {
+      const id = document.getElementById('modal-trainer-select').value;
+      const trainer = window.appState.trainers.find(t => t.id === id);
+      if (trainer) {
+        document.getElementById('modal-trainer-name').value = trainer.name;
+        document.getElementById('modal-trainer-cofq').value = trainer.cofq;
+      }
+    }
+
+    function openSingleSignModal(skillCode) {
+      activeModalSkillCodes = [skillCode];
+      const skill = SKILL_LOOKUP[skillCode];
+      const existing = window.appState.signOffs[skillCode];
+
+      document.getElementById('modal-skill-code').textContent = `COMPETENCY ${skill.code} • SKILL SET ${skill.setCode}`;
+      document.getElementById('modal-skill-title').textContent = skill.title;
+      document.getElementById('modal-reminder-text').textContent = skill.passCriteria;
+
+      populateModalTrainerDropdown();
+
+      const revokeBtn = document.getElementById('modal-revoke-btn');
+      if (existing) {
+        document.getElementById('modal-date').value = existing.date || getTodayISO();
+        document.getElementById('modal-trainer-name').value = existing.trainerName || '';
+        document.getElementById('modal-trainer-cofq').value = existing.trainerCofq || '';
+        document.getElementById('modal-notes').value = existing.notes || '';
+        revokeBtn.classList.remove('hidden');
+      } else {
+        document.getElementById('modal-date').value = getTodayISO();
+        if (window.appState.trainers.length > 0) {
+          document.getElementById('modal-trainer-select').value = window.appState.trainers[0].id;
+          document.getElementById('modal-trainer-name').value = window.appState.trainers[0].name;
+          document.getElementById('modal-trainer-cofq').value = window.appState.trainers[0].cofq;
+        } else {
+          document.getElementById('modal-trainer-name').value = '';
+          document.getElementById('modal-trainer-cofq').value = '';
+        }
+        document.getElementById('modal-notes').value = '';
+        revokeBtn.classList.add('hidden');
+      }
+
+      document.getElementById('signoff-modal').classList.remove('hidden');
+      sigCanvas._resize();
+      clearSignaturePad();
+
+      if (existing && existing.signatureDataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          const rect = sigCanvas.getBoundingClientRect();
+          sigCtx.drawImage(img, 0, 0, rect.width, rect.height);
+          hasSignatureStrokes = true;
+          document.getElementById('sig-placeholder').classList.add('hidden');
+        };
+        img.src = existing.signatureDataUrl;
+      }
+
+      lucide.createIcons();
+    }
+
+    function openBatchSignModal() {
+      if (batchSelected.size === 0) {
+        showToast('Select at least one skill first.', 'error');
+        return;
+      }
+      activeModalSkillCodes = Array.from(batchSelected);
+      document.getElementById('modal-skill-code').textContent = `BATCH JOBSITE SIGN-OFF`;
+      document.getElementById('modal-skill-title').textContent = `Signing Off ${activeModalSkillCodes.length} Selected Competencies`;
+      document.getElementById('modal-reminder-text').textContent = `Verifying batch sign-off for ${activeModalSkillCodes.length} competencies against STO 313D standards.`;
+
+      populateModalTrainerDropdown();
+      document.getElementById('modal-date').value = getTodayISO();
+      if (window.appState.trainers.length > 0) {
+        document.getElementById('modal-trainer-select').value = window.appState.trainers[0].id;
+        document.getElementById('modal-trainer-name').value = window.appState.trainers[0].name;
+        document.getElementById('modal-trainer-cofq').value = window.appState.trainers[0].cofq;
+      } else {
+        document.getElementById('modal-trainer-name').value = '';
+        document.getElementById('modal-trainer-cofq').value = '';
+      }
+      document.getElementById('modal-notes').value = '';
+      document.getElementById('modal-revoke-btn').classList.add('hidden');
+
+      document.getElementById('signoff-modal').classList.remove('hidden');
+      sigCanvas._resize();
+      clearSignaturePad();
+      lucide.createIcons();
+    }
+
+    function closeSignModal() {
+      document.getElementById('signoff-modal').classList.add('hidden');
+      activeModalSkillCodes = [];
+    }
+
+    function submitSkillSignOff(e) {
+      e.preventDefault();
+      const date = document.getElementById('modal-date').value;
+      const trainerName = document.getElementById('modal-trainer-name').value.trim();
+      const trainerCofq = document.getElementById('modal-trainer-cofq').value.trim();
+      const notes = document.getElementById('modal-notes').value.trim();
+
+      if (!trainerName || !trainerCofq) {
+        showToast('Journeyperson Name and 313D CofQ # are required.', 'error');
+        return;
+      }
+      if (!hasSignatureStrokes) {
+        showToast('Please draw a Journeyperson signature on the signature pad.', 'error');
+        return;
+      }
+
+      const signatureDataUrl = sigCanvas.toDataURL('image/png');
+
+      activeModalSkillCodes.forEach(code => {
+        window.appState.signOffs[code] = { date, trainerName, trainerCofq, signatureDataUrl, notes };
+      });
+
+      const existsInRegistry = window.appState.trainers.some(
+        t => t.cofq.toLowerCase() === trainerCofq.toLowerCase()
+      );
+      if (!existsInRegistry) {
+        window.appState.trainers.push({
+          id: 'tr_' + Date.now(),
+          name: trainerName,
+          cofq: trainerCofq,
+          startDate: date
+        });
+      }
+
+      saveState();
+      const count = activeModalSkillCodes.length;
+      closeSignModal();
+
+      if (batchMode) {
+        toggleBatchMode();
+      } else {
+        renderLogbook();
+      }
+
+      showToast(count > 1 ? `${count} competencies signed & synced!` : `Competency signed & synced to cloud!`);
+    }
+
+    function revokeSkillSignOff() {
+      if (activeModalSkillCodes.length !== 1) return;
+      const code = activeModalSkillCodes[0];
+      openConfirmModal('Remove Sign-Off?', `Are you sure you want to remove the sign-off record for ${code}?`, () => {
+        delete window.appState.signOffs[code];
+        saveState();
+        closeSignModal();
+        renderLogbook();
+        showToast(`Sign-off removed.`);
+      });
+    }
+
+    // Hours tab logic
+    function renderHoursTab() {
+      document.getElementById('hours-date').value = getTodayISO();
+      if (!document.getElementById('hours-sponsor').value && window.appState.profile.sponsorName) {
+        document.getElementById('hours-sponsor').value = window.appState.profile.sponsorName;
+      }
+
+      document.getElementById('school-lvl1').checked = Boolean(window.appState.schoolLevels.level1);
+      document.getElementById('school-lvl2').checked = Boolean(window.appState.schoolLevels.level2);
+
+      const schoolHrs = (window.appState.schoolLevels.level1 ? 240 : 0) + (window.appState.schoolLevels.level2 ? 240 : 0);
+      document.getElementById('school-hours-badge').textContent = `${schoolHrs} / 480 Hours Completed`;
+
+      const tbody = document.getElementById('hours-table-body');
+      document.getElementById('hours-entry-count').textContent = `${window.appState.hoursLog.length} entries`;
+
+      if (window.appState.hoursLog.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-6 text-center text-xs text-slate-400">
+              No field hours logged yet. Use the form on the left to record your weekly or daily hours.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const sorted = [...window.appState.hoursLog].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      tbody.innerHTML = sorted.map(entry => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 font-medium text-slate-800 whitespace-nowrap">${escapeHTML(entry.date)}</td>
+          <td class="py-2.5 px-3 font-bold text-blue-700 whitespace-nowrap">${entry.hours} hrs</td>
+          <td class="py-2.5 px-3 text-xs">
+            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">${escapeHTML(entry.category)}</span>
+          </td>
+          <td class="py-2.5 px-3 text-xs text-slate-600">
+            <div class="font-semibold text-slate-800">${escapeHTML(entry.sponsor || '—')}</div>
+            ${entry.notes ? `<div class="text-slate-500">${escapeHTML(entry.notes)}</div>` : ''}
+          </td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="deleteHoursEntry('${entry.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function addHoursEntry(e) {
+      e.preventDefault();
+      const date = document.getElementById('hours-date').value;
+      const hours = parseFloat(document.getElementById('hours-amount').value);
+      const category = document.getElementById('hours-category').value;
+      const sponsor = document.getElementById('hours-sponsor').value.trim();
+      const notes = document.getElementById('hours-notes').value.trim();
+
+      if (!date || isNaN(hours) || hours <= 0) {
+        showToast('Please enter a valid date and hours.', 'error');
+        return;
+      }
+
+      window.appState.hoursLog.push({ id: 'hr_' + Date.now(), date, hours, category, sponsor, notes });
+      saveState();
+      document.getElementById('hours-amount').value = '';
+      document.getElementById('hours-notes').value = '';
+      renderHoursTab();
+      showToast(`Logged ${hours} on-the-job hours.`);
+    }
+
+    function deleteHoursEntry(id) {
+      openConfirmModal('Delete Hours Entry?', 'Remove this logged hours record?', () => {
+        window.appState.hoursLog = window.appState.hoursLog.filter(item => item.id !== id);
+        saveState();
+        renderHoursTab();
+        showToast('Hours entry deleted.');
+      });
+    }
+
+    function toggleSchoolLevel(lvl) {
+      if (lvl === 1) window.appState.schoolLevels.level1 = document.getElementById('school-lvl1').checked;
+      if (lvl === 2) window.appState.schoolLevels.level2 = document.getElementById('school-lvl2').checked;
+      saveState();
+      renderHoursTab();
+      showToast('In-school training status updated.');
+    }
+
+    // Profile & Trainers tab logic
+    function renderProfileTab() {
+      const p = window.appState.profile;
+      document.getElementById('prof-apprentice-name').value = p.apprenticeName || '';
+      document.getElementById('prof-agreement-num').value = p.agreementNum || '';
+      document.getElementById('prof-sto-num').value = p.stoNum || '';
+      document.getElementById('prof-sponsor-name').value = p.sponsorName || '';
+      document.getElementById('prof-sponsor-contact').value = p.sponsorContact || '';
+      document.getElementById('prof-start-date').value = p.startDate || '';
+
+      const listEl = document.getElementById('trainers-list');
+      if (window.appState.trainers.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-6 text-xs text-slate-400 border border-dashed border-slate-200 rounded-xl">
+            No supervising journeypersons added yet. Add your 313D Trainer above so they auto-fill when signing skills.
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = window.appState.trainers.map(t => `
+        <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white">
+          <div>
+            <div class="font-bold text-sm text-slate-900">${escapeHTML(t.name)}</div>
+            <div class="text-xs text-slate-600">
+              <span class="font-semibold text-emerald-700">313D CofQ #: ${escapeHTML(t.cofq)}</span>
+              ${t.startDate ? ` • Since ${escapeHTML(t.startDate)}` : ''}
+            </div>
+          </div>
+          <button onclick="removeTrainer('${t.id}')" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      window.appState.profile = {
+        apprenticeName: document.getElementById('prof-apprentice-name').value.trim(),
+        agreementNum: document.getElementById('prof-agreement-num').value.trim(),
+        stoNum: document.getElementById('prof-sto-num').value.trim(),
+        sponsorName: document.getElementById('prof-sponsor-name').value.trim(),
+        sponsorContact: document.getElementById('prof-sponsor-contact').value.trim(),
+        startDate: document.getElementById('prof-start-date').value
+      };
+      saveState();
+      showToast('Apprentice & Sponsor profile saved & synced!');
+    }
+
+    function addTrainer(e) {
+      e.preventDefault();
+      const name = document.getElementById('trainer-name').value.trim();
+      const cofq = document.getElementById('trainer-cofq').value.trim();
+      const startDate = document.getElementById('trainer-start').value;
+
+      if (!name || !cofq) return;
+
+      window.appState.trainers.push({ id: 'tr_' + Date.now(), name, cofq, startDate });
+      saveState();
+      document.getElementById('trainer-name').value = '';
+      document.getElementById('trainer-cofq').value = '';
+      document.getElementById('trainer-start').value = '';
+      renderProfileTab();
+      showToast(`Added Trainer ${name} (${cofq}).`);
+    }
+
+    function removeTrainer(id) {
+      openConfirmModal('Remove Trainer?', 'Remove this trainer from your registry?', () => {
+        window.appState.trainers = window.appState.trainers.filter(t => t.id !== id);
+        saveState();
+        renderProfileTab();
+        showToast('Trainer removed.');
+      });
+    }
+
+    // Audit Report & Export
+    function renderAuditReport() {
+      const stats = getStats();
+      const p = window.appState.profile;
+
+      document.getElementById('audit-date').textContent = new Date().toLocaleDateString('en-CA', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+      document.getElementById('audit-apprentice-name').textContent = p.apprenticeName || 'Not Entered';
+      document.getElementById('audit-agreement-num').textContent = p.agreementNum || 'Not Entered';
+      document.getElementById('audit-sto-num').textContent = p.stoNum || 'Not Entered';
+      document.getElementById('audit-sponsor-name').textContent = p.sponsorName || 'Not Entered';
+      document.getElementById('audit-otj-hours').textContent = `${stats.otjHours.toLocaleString()} / 4,020 hrs (${Math.round((stats.otjHours / 4020) * 100)}%)`;
+      document.getElementById('audit-total-hours').textContent = `${stats.totalHours.toLocaleString()} / 4,500 hrs (Incl. ${stats.schoolHours} school hrs)`;
+
+      const trainersTbody = document.getElementById('audit-trainers-tbody');
+      if (window.appState.trainers.length === 0) {
+        trainersTbody.innerHTML = `<tr><td colspan="3" class="p-2 border border-slate-200 text-slate-400 italic">No trainers listed in registry.</td></tr>`;
+      } else {
+        trainersTbody.innerHTML = window.appState.trainers.map(t => `
+          <tr>
+            <td class="p-2 border border-slate-200 font-semibold">${escapeHTML(t.name)}</td>
+            <td class="p-2 border border-slate-200 font-mono">${escapeHTML(t.cofq)}</td>
+            <td class="p-2 border border-slate-200">${escapeHTML(t.startDate || '—')}</td>
+          </tr>
+        `).join('');
+      }
+
+      const setsTbody = document.getElementById('audit-skillsets-tbody');
+      setsTbody.innerHTML = stats.setBreakdown.map(s => `
+        <tr>
+          <td class="p-2 border border-slate-200 font-bold">${s.code}</td>
+          <td class="p-2 border border-slate-200">${escapeHTML(s.title)}</td>
+          <td class="p-2 border border-slate-200 text-center font-semibold">${s.signed} / ${s.total}</td>
+          <td class="p-2 border border-slate-200 text-center font-bold">${s.pct}%</td>
+          <td class="p-2 border border-slate-200 font-semibold ${s.meets80 ? 'text-emerald-700' : 'text-slate-500'}">
+            ${s.meets80 ? '80% Met (Ready)' : 'In Progress'}
+          </td>
+        </tr>
+      `).join('');
+
+      const signedTbody = document.getElementById('audit-signed-skills-tbody');
+      const signedCodes = Object.keys(window.appState.signOffs).sort();
+      if (signedCodes.length === 0) {
+        signedTbody.innerHTML = `<tr><td colspan="6" class="p-3 border border-slate-200 text-center text-slate-400 italic">No skills signed off yet.</td></tr>`;
+      } else {
+        signedTbody.innerHTML = signedCodes.map(code => {
+          const skill = SKILL_LOOKUP[code];
+          const s = window.appState.signOffs[code];
+          return `
+            <tr class="print-break-inside-avoid">
+              <td class="p-2 border border-slate-200 font-mono font-bold whitespace-nowrap">${code}</td>
+              <td class="p-2 border border-slate-200">${escapeHTML(skill ? skill.title : '')}</td>
+              <td class="p-2 border border-slate-200 whitespace-nowrap">${escapeHTML(s.date)}</td>
+              <td class="p-2 border border-slate-200">
+                <div class="font-semibold">${escapeHTML(s.trainerName)}</div>
+                <div class="text-[10px] text-slate-500">CofQ: ${escapeHTML(s.trainerCofq)}</div>
+              </td>
+              <td class="p-1.5 border border-slate-200 bg-white">
+                ${s.signatureDataUrl ? `<img src="${s.signatureDataUrl}" alt="Sig" class="h-7 w-20 object-contain" />` : 'Signed'}
+              </td>
+              <td class="p-2 border border-slate-200 text-slate-600">${escapeHTML(s.notes || '—')}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    function exportCSV() {
+      const rows = [
+        ['Skill Set Code', 'Skill Set Title', 'Skill Code', 'Competency Title', 'Status', 'Date Signed', 'Trainer Name', 'Trainer 313D CofQ #', 'Job Notes']
+      ];
+
+      SKILL_SETS.forEach(set => {
+        set.skills.forEach(skill => {
+          const s = window.appState.signOffs[skill.code];
+          rows.push([
+            set.code, set.title, skill.code, skill.title,
+            s ? 'SIGNED OFF' : 'PENDING',
+            s ? s.date : '', s ? s.trainerName : '', s ? s.trainerCofq : '', s ? (s.notes || '') : ''
+          ]);
+        });
+      });
+
+      const csvContent = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `313D_STO_Logbook_${getTodayISO()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('CSV Audit Spreadsheet exported!');
+    }
+
+    function exportJSON() {
+      const dataStr = JSON.stringify(window.appState, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `313D_Logbook_CloudBackup_${getTodayISO()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('JSON Backup downloaded!');
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported || typeof imported !== 'object' || !imported.signOffs) {
+            throw new Error('Invalid format');
+          }
+          window.appState = {
+            ...window.appState,
+            ...imported,
+            profile: { ...window.appState.profile, ...(imported.profile || {}) },
+            schoolLevels: { ...window.appState.schoolLevels, ...(imported.schoolLevels || {}) },
+            ui: { ...window.appState.ui, ...(imported.ui || {}) }
+          };
+          saveState();
+          window.refreshAllViews();
+          showToast('Logbook restored & synced to cloud!');
+        } catch (err) {
+          showToast('Invalid JSON backup file.', 'error');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      initSignaturePad();
+      window.refreshAllViews();
+      lucide.createIcons();
+      checkPinLockStatus();
+    });
+  </script>
+</body>
+</html>
