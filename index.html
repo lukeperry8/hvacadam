@@ -1188,7 +1188,7 @@
       const submitBtn = document.getElementById('pin-submit-btn');
 
       titleEl.textContent = "Private Logbook Locked";
-      descEl.textContent = "Enter PIN (4747) to unlock your secure apprenticeship records.";
+      descEl.textContent = "Enter PIN to unlock your secure apprenticeship records.";
       submitBtn.textContent = "Unlock Logbook";
       overlay.classList.remove('hidden');
     }
@@ -1202,7 +1202,7 @@
         document.getElementById('pin-input').value = '';
         showToast('Logbook unlocked.');
       } else {
-        showToast('Incorrect PIN. (Hint: 4747)', 'error');
+        showToast('Incorrect PIN.', 'error');
         document.getElementById('pin-input').value = '';
       }
     }
