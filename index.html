@@ -1045,20 +1045,16 @@
     window.SKILL_LOOKUP = SKILL_LOOKUP;
 
     // Firebase Initialization & Sync Setup
-   // Use your unique app ID for saving data
-const appId = '313d-default-app'; 
+    const appId = '313d-default-app'; 
 
-// Your actual Firebase project configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBLaqpe4rm5Wm5F4Edm7jFT5OAEnYvVFEU", // Get this from your Firebase Console
-  authDomain: "hvac-98eca.firebaseapp.com",
-  projectId: "hvac-98eca",
-  storageBucket: "hvac-98eca.firebasestorage.app",
-  messagingSenderId: "904387474056",
-  appId: "1:904387474056:web:ab51059b3a80f5bf37e53d" // Get this from your Firebase Console
-};
-
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const firebaseConfig = {
+      apiKey: "AIzaSyBLaqpe4rm5Wm5F4Edm7jFT5OAEnYvVFEU",
+      authDomain: "hvac-98eca.firebaseapp.com",
+      projectId: "hvac-98eca",
+      storageBucket: "hvac-98eca.firebasestorage.app",
+      messagingSenderId: "904387474056",
+      appId: "1:904387474056:web:ab51059b3a80f5bf37e53d"
+    };
 
     let app, db, auth, currentUser = null;
     let isRemoteUpdate = false;
