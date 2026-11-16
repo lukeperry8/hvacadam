@@ -301,7 +301,7 @@
       <div class="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-4">
         <div class="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div class="text-xs font-bold uppercase tracking-widest text-amber-600">Skilled Trades Ontario — Trade Code 313D</div>
+            <div class="text-xs font-bold uppercase tracking-widest text-amber-600">Skilled Trades Ontario   Trade Code 313D</div>
             <h2 class="text-xl font-extrabold text-slate-900">STO Training Standards, Instrument Guide &amp; Pass Criteria</h2>
             <p class="text-xs text-slate-600">Detailed breakdown of all 8 Skill Sets, mandatory specialty instruments, safety compliance (CSA B52, ODP Reg. 463/10), and sign-off benchmarks.</p>
           </div>
@@ -531,7 +531,7 @@
             </div>
             <div>
               <h2 class="font-bold text-slate-900 text-base">List of Trainers / Journeypersons</h2>
-              <p class="text-xs text-slate-500">Page 18 Registry — Must hold active 313D CofQ</p>
+              <p class="text-xs text-slate-500">Page 18 Registry   Must hold active 313D CofQ</p>
             </div>
           </div>
 
@@ -596,26 +596,26 @@
       <div id="audit-report-container" class="bg-white rounded-xl p-5 sm:p-8 border border-slate-200 shadow-sm space-y-6">
         <div class="border-b-2 border-slate-900 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <div class="text-xs font-bold uppercase tracking-widest text-amber-600">Skilled Trades Ontario — Trade Code 313D</div>
+            <div class="text-xs font-bold uppercase tracking-widest text-amber-600">Skilled Trades Ontario   Trade Code 313D</div>
             <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Residential Air Conditioning Systems Mechanic</h2>
-            <p class="text-xs text-slate-600">Apprenticeship Training Standard — Digital Field Competency &amp; Hours Audit Summary</p>
+            <p class="text-xs text-slate-600">Apprenticeship Training Standard   Digital Field Competency &amp; Hours Audit Summary</p>
           </div>
           <div class="text-left sm:text-right text-xs text-slate-600">
             <div><strong>Generated:</strong> <span id="audit-date"></span></div>
-            <div><strong>Standard Ref:</strong> Skill Sets 9117 – 9124</div>
+            <div><strong>Standard Ref:</strong> Skill Sets 9117   9124</div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div class="space-y-1.5">
             <div class="font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1">Apprentice Information</div>
-            <div><span class="text-slate-500">Full Name:</span> <strong id="audit-apprentice-name">—</strong></div>
-            <div><span class="text-slate-500">Training Agreement #:</span> <strong id="audit-agreement-num">—</strong></div>
-            <div><span class="text-slate-500">STO Account #:</span> <strong id="audit-sto-num">—</strong></div>
+            <div><span class="text-slate-500">Full Name:</span> <strong id="audit-apprentice-name"> </strong></div>
+            <div><span class="text-slate-500">Training Agreement #:</span> <strong id="audit-agreement-num"> </strong></div>
+            <div><span class="text-slate-500">STO Account #:</span> <strong id="audit-sto-num"> </strong></div>
           </div>
           <div class="space-y-1.5">
             <div class="font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1">Sponsor &amp; Hours Benchmark</div>
-            <div><span class="text-slate-500">Sponsor:</span> <strong id="audit-sponsor-name">—</strong></div>
+            <div><span class="text-slate-500">Sponsor:</span> <strong id="audit-sponsor-name"> </strong></div>
             <div><span class="text-slate-500">On-The-Job Hours:</span> <strong id="audit-otj-hours">0 / 4,020 hrs</strong></div>
             <div><span class="text-slate-500">In-School + Total Hours:</span> <strong id="audit-total-hours">0 / 4,500 hrs</strong></div>
           </div>
@@ -880,7 +880,7 @@
         </button>
       </form>
       <div class="text-center text-[11px] text-slate-500">
-        100% Private • Secured locally &amp; synced via cloud.
+        100% Private   Secured locally &amp; synced via cloud.
       </div>
     </div>
   </div>
@@ -1045,7 +1045,19 @@
     window.SKILL_LOOKUP = SKILL_LOOKUP;
 
     // Firebase Initialization & Sync Setup
-    const appId = typeof __app_id !== 'undefined' ? __app_id : '313d-default-app';
+   // Use your unique app ID for saving data
+const appId = '313d-default-app'; 
+
+// Your actual Firebase project configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBLaqpe4rm5Wm5F4Edm7jFT5OAEnYvVFEU", // Get this from your Firebase Console
+  authDomain: "hvac-98eca.firebaseapp.com",
+  projectId: "hvac-98eca",
+  storageBucket: "hvac-98eca.firebasestorage.app",
+  messagingSenderId: "904387474056",
+  appId: "1:904387474056:web:ab51059b3a80f5bf37e53d" // Get this from your Firebase Console
+};
+
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
 
     let app, db, auth, currentUser = null;
@@ -1337,7 +1349,7 @@
       document.getElementById('header-skills-count').textContent = `${stats.signedCount} / ${stats.totalSkills}`;
       document.getElementById('header-hours-count').textContent = `${stats.totalHours.toLocaleString()} / 4,500`;
       if (window.appState.profile.apprenticeName) {
-        document.getElementById('header-subtitle').textContent = `Apprentice: ${window.appState.profile.apprenticeName}${window.appState.profile.stoNum ? ' • ' + window.appState.profile.stoNum : ''}`;
+        document.getElementById('header-subtitle').textContent = `Apprentice: ${window.appState.profile.apprenticeName}${window.appState.profile.stoNum ? '   ' + window.appState.profile.stoNum : ''}`;
       }
 
       document.getElementById('kpi-skills').textContent = `${stats.signedCount} / ${stats.totalSkills}`;
@@ -1639,7 +1651,7 @@
       const skill = SKILL_LOOKUP[skillCode];
       if (!skill) return;
 
-      document.getElementById('crit-modal-code').textContent = `COMPETENCY ${skill.code} • SKILL SET ${skill.setCode}`;
+      document.getElementById('crit-modal-code').textContent = `COMPETENCY ${skill.code}   SKILL SET ${skill.setCode}`;
       document.getElementById('crit-modal-title').textContent = skill.title;
       document.getElementById('crit-modal-req').textContent = skill.req;
       document.getElementById('crit-modal-tools').textContent = skill.tools;
@@ -1766,7 +1778,7 @@
       const skill = SKILL_LOOKUP[skillCode];
       const existing = window.appState.signOffs[skillCode];
 
-      document.getElementById('modal-skill-code').textContent = `COMPETENCY ${skill.code} • SKILL SET ${skill.setCode}`;
+      document.getElementById('modal-skill-code').textContent = `COMPETENCY ${skill.code}   SKILL SET ${skill.setCode}`;
       document.getElementById('modal-skill-title').textContent = skill.title;
       document.getElementById('modal-reminder-text').textContent = skill.passCriteria;
 
@@ -1940,7 +1952,7 @@
             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">${escapeHTML(entry.category)}</span>
           </td>
           <td class="py-2.5 px-3 text-xs text-slate-600">
-            <div class="font-semibold text-slate-800">${escapeHTML(entry.sponsor || '—')}</div>
+            <div class="font-semibold text-slate-800">${escapeHTML(entry.sponsor || ' ')}</div>
             ${entry.notes ? `<div class="text-slate-500">${escapeHTML(entry.notes)}</div>` : ''}
           </td>
           <td class="py-2.5 px-3 text-right">
@@ -2017,7 +2029,7 @@
             <div class="font-bold text-sm text-slate-900">${escapeHTML(t.name)}</div>
             <div class="text-xs text-slate-600">
               <span class="font-semibold text-emerald-700">313D CofQ #: ${escapeHTML(t.cofq)}</span>
-              ${t.startDate ? ` • Since ${escapeHTML(t.startDate)}` : ''}
+              ${t.startDate ? `   Since ${escapeHTML(t.startDate)}` : ''}
             </div>
           </div>
           <button onclick="removeTrainer('${t.id}')" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg">
@@ -2091,7 +2103,7 @@
           <tr>
             <td class="p-2 border border-slate-200 font-semibold">${escapeHTML(t.name)}</td>
             <td class="p-2 border border-slate-200 font-mono">${escapeHTML(t.cofq)}</td>
-            <td class="p-2 border border-slate-200">${escapeHTML(t.startDate || '—')}</td>
+            <td class="p-2 border border-slate-200">${escapeHTML(t.startDate || ' ')}</td>
           </tr>
         `).join('');
       }
@@ -2129,7 +2141,7 @@
               <td class="p-1.5 border border-slate-200 bg-white">
                 ${s.signatureDataUrl ? `<img src="${s.signatureDataUrl}" alt="Sig" class="h-7 w-20 object-contain" />` : 'Signed'}
               </td>
-              <td class="p-2 border border-slate-200 text-slate-600">${escapeHTML(s.notes || '—')}</td>
+              <td class="p-2 border border-slate-200 text-slate-600">${escapeHTML(s.notes || ' ')}</td>
             </tr>
           `;
         }).join('');
@@ -2211,5 +2223,6 @@
       checkPinLockStatus();
     });
   </script>
-</body>
+
+ </body>
 </html>
