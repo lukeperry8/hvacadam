@@ -1120,7 +1120,7 @@
       if (!db || !currentUser) return;
       try {
         isRemoteUpdate = true;
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'logbook_state_v1');
+       const docRef = doc(db, 'artifacts', appId, 'user_data', 'logbook_state_v1');
         await setDoc(docRef, window.appState, { merge: true });
         setTimeout(() => { isRemoteUpdate = false; }, 400);
       } catch (err) {
