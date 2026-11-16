@@ -1088,7 +1088,8 @@
           if (mText) { mText.textContent = "Cloud Synced"; }
           if (mId) { mId.textContent = currentUser.uid.substring(0, 6) + '...'; }
 
-          const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'logbook_state_v1');
+        const docRef = doc(db, 'artifacts', appId, 'user_data', 'logbook_state_v1');
+
           
           onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
